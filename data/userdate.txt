@@ -1,0 +1,2 @@
+OPTDate,Hospital,TerminalId,UserID,UserName,loginTimes,optionTimes,successTimes,failedTimes,over1Mins,provideTimes,totalProvideMedicines,retireTimes,totalRetireMedicines,batchProvideTimes,totalBacProvideMedicines,supplyTimes,totalSupplyMedicines,stockTimes
+2018-07-07,1,PC1,A500,"Zhang San",13,16,0,16,1,7,7,2,2,5,0,3,0,30

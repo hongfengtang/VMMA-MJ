@@ -1,0 +1,30 @@
+server:
+  type: out
+  title: 管制類藥品櫃管理系統
+  
+logging:
+  level:
+    root: INFO
+    com.hma.vmma: TRACE
+  file: 
+    name: logs/vmma.log
+    max-size: 5MB
+    max-history: 90
+  charset:
+    file: UTF-8
+    console: UTF-8
+  logback:
+    rollingpolicy:
+      max-file-size: 5MB
+      max-history: 90
+
+spring:
+  datasource:
+    type: org.sqlite.SQLiteDataSource
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:data/system.db
+    
+  jpa:
+    database-platform: com.enigmabridge.hibernate.dialect.SQLiteDialect
+    show-sql: false
+

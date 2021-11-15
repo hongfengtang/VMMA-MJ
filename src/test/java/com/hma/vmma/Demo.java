@@ -1,0 +1,155 @@
+package com.hma.vmma;
+
+import java.net.URL;
+import java.awt.Point;
+import java.awt.Image;
+import java.awt.Graphics;
+import java.awt.Dimension;
+import javax.swing.ImageIcon;
+
+import javax.swing.JLabel;
+import java.awt.Color;
+import java.awt.GridLayout;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+import javax.swing.border.LineBorder;
+import java.net.MalformedURLException;
+
+/**Title: Demo.java
+ * 示例代码
+ * 
+ * @author Run
+ * @date  2019-08-20 */
+public class Demo{
+
+    public static void main(String args[]){
+    	
+    	String s = "藥物編號: 12345678:aaa ";
+    	int i = s.indexOf(":");
+    	String id = s.substring(i+1);
+    	
+    	System.out.println("id = [" + id.trim() + "]");
+    	
+//        SwingUtilities.invokeLater( () ->{
+//            //运行示例代码
+//            AutoAdjustIconDemo();
+//        });
+    }
+    
+    /**图像自适应组件大小
+     * @date  2019-08-20 */
+    static void AutoAdjustIconDemo() {
+        JFrame frame=new JFrame("Auto-adjust Icon");
+        JPanel panel=new JPanel(new GridLayout(1, 3, 10, 10));
+        //导入图片
+        Image image = null;
+        try {
+            //一张来自CSDN的默认用户头像
+            URL url = new URL("https://imgconvert.csdnimg.cn/"
+                    + "aHR0cHM6Ly9hdmF0YXIuY3Nkbi5uZXQvNy83L0IvMV9yYWxmX2h4MTYzY29tLmpwZw");
+            image = new ImageIcon("images/faceid.png").getImage();
+        } catch (MalformedURLException e) {
+            System.out.println("HTTP ERROR 404");
+        }
+        //等比例JLabel
+        JLabel ratioLabel = new JLabel();
+        ratioLabel.setIcon(SwingUtil.createAutoAdjustIcon(image, true));
+        ratioLabel.setBorder(new LineBorder(Color.RED));
+//        ratioLabel.setAlignmentX(0.5F);
+//        ratioLabel.setAlignmentY(0.5F);
+        //不等比例JLabel
+        JLabel filledLabel = new JLabel();
+        filledLabel.setIcon(SwingUtil.createAutoAdjustIcon(image, false));
+        filledLabel.setBorder(new LineBorder(Color.ORANGE));
+        //常规样式JLabel
+        JLabel normalLabel = new JLabel();
+        normalLabel.setIcon(new ImageIcon(image));
+        normalLabel.setBorder(new LineBorder(Color.BLUE));
+        //JPanel内容
+        panel.add(ratioLabel);
+        panel.add(filledLabel);
+        panel.add(normalLabel);
+        //JFrame内容
+        frame.getContentPane().add(panel);
+        frame.setSize(600,480);
+        //JFrame属性
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
+
+//
+/**Swing工具类
+ * 
+ * @author Run
+ * @date  2019-08-20 */
+class SwingUtil {
+
+    /**创建一个可以自适应组件大小的ImageIcon对象
+     * @param image 从<code> Image </code>对象来创建ImageIcon
+     * @param constrained 是否等比例缩放 。当为<code> true </code>时，可通过
+     *      {@link javax.swing.JComponent#setAlignmentX(float)}和
+     *      {@link javax.swing.JComponent#setAlignmentY(float)}方法设置组件对齐方式。
+     * @date  2019-08-20 */
+    public static ImageIcon createAutoAdjustIcon(Image image, boolean constrained) {
+        ImageIcon icon = new ImageIcon(image) {
+            @Override
+            public synchronized void paintIcon(java.awt.Component cmp, Graphics g, int x, int y) {
+                //初始化参数
+                Point startPoint = new Point(0, 0);//默认绘制起点
+                Dimension cmpSize = cmp.getSize();//获取组件大小
+                Dimension imgSize = new Dimension(getIconWidth(), getIconHeight());//获取图像大小
+                
+                //计算绘制起点和区域
+                if(constrained) {//等比例缩放
+                    //计算图像宽高比例
+                    double ratio = 1.0*imgSize.width/imgSize.height;
+                    //计算等比例缩放后的区域大小
+                    imgSize.width = (int) Math.min(cmpSize.width, ratio*cmpSize.height);
+                    imgSize.height = (int) (imgSize.width/ratio);
+                    //计算绘制起点
+                    startPoint.x = (int) 
+                            (cmp.getAlignmentX()*(cmpSize.width - imgSize.width));
+                    startPoint.y = (int) 
+                            (cmp.getAlignmentY()*(cmpSize.height - imgSize.height));
+                } else {//完全填充
+                    imgSize = cmpSize;
+                }
+                
+                //根据起点和区域大小进行绘制
+                if(getImageObserver() == null) {
+                    g.drawImage(getImage(), startPoint.x, startPoint.y,
+                            imgSize.width, imgSize.height, cmp);
+                 } else {
+                    g.drawImage(getImage(), startPoint.x, startPoint.y,
+                            imgSize.width, imgSize.height, getImageObserver());
+                 }
+            };
+        };
+        return icon;
+    }
+    
+    /**创建一个可以自适应组件大小的Icon对象
+     * @param filename 指定文件名或者路径的字符串
+     * @param constrained 是否等比例缩放。当为<code> true </code>时，可通过
+     *      {@link javax.swing.JComponent#setAlignmentX(float)}和
+     *      {@link javax.swing.JComponent#setAlignmentY(float)}方法设置组件对齐方式。
+     * @date  2019-08-20 */
+    public static ImageIcon createAutoAdjustIcon(String filename, boolean constrained) {
+        return createAutoAdjustIcon(new ImageIcon(filename).getImage(), constrained);
+    }
+    
+    /**创建一个可以自适应组件大小的ImageIcon对象
+     * @param url 从指定的<code> URL </code>对象来创建ImageIcon
+     * @param constrained 是否等比例缩放 。当为<code> true </code>时，可通过
+     *      {@link javax.swing.JComponent#setAlignmentX(float)}和
+     *      {@link javax.swing.JComponent#setAlignmentY(float)}方法设置组件对齐方式。
+     * @date  2019-08-20 */
+    public static ImageIcon createAutoAdjustIcon(URL url, boolean constrained) {
+        return createAutoAdjustIcon(new ImageIcon(url).getImage(), constrained);
+    }
+    
+}

@@ -1,0 +1,1 @@
+sqlite3.exe icma.db < delete.sql
