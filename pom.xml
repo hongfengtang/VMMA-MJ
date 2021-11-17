@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.hma.vmma</groupId>
-	<artifactId>VMMA</artifactId>
+	<artifactId>MMH-VMMA</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>VMMA</name>
-	<description>Veding Machine Medicine Assistant</description>
+	<name>MMH-VMMA</name>
+	<description>MacKay Memorial Hospital - Veding Machine Medicine Assistant</description>
 	<properties>
 		<java.version>1.8</java.version>
 <!-- 
@@ -125,7 +125,7 @@
  
 					<archive>
 						<manifest>
-							<mainClass>com.hma.vmma.VmmaApplication</mainClass> 
+							<mainClass>com.mmh.vmma.VmmaApplication</mainClass> 
 						</manifest>
 					</archive>
 				</configuration>

@@ -364,8 +364,8 @@ implements ISignageCallBack{
 				(medicines.getMedicinedata().get(medicineIndex).getDoseUnit() == null ? "" : 
 					medicines.getMedicinedata().get(medicineIndex).getDoseUnit().trim()));;
 		lblBoxId.setText("儲位編號: " + boxId);
-		lblBoxQuantityNow.setText("現存藥量: " + String.valueOf(planQty));
-		lblPlanSupply.setText("領 藥 量: " + String.valueOf(stockQty));
+		lblBoxQuantityNow.setText("現存藥量: " + String.valueOf(stockQty));
+		lblPlanSupply.setText("領 藥 量: " + String.valueOf(planQty));
 		
 		lblChartNo.setText("病 歷 號: " + (medicines.getChartNo() == null ? "" : medicines.getChartNo().trim()));
 		lblPatientName.setText("病患姓名: " + 
@@ -511,7 +511,7 @@ implements ISignageCallBack{
 					medicineId, takedQty);
 			lblRturnMessage.setOpaque(true);
 			lblRturnMessage.setBackground(Color.GREEN);
-			lblRturnMessage.setText("正在取第[" + takedQty + "]包藥，請稍後……");
+			lblRturnMessage.setText("正在取第[" + takedQty + "]包藥，請稍候……");
 			return;
 		}
 
@@ -531,6 +531,10 @@ implements ISignageCallBack{
 		
 			//更新接口，取藥成功
 			status = CONSTANTS.SUCCESS;
+			lblRturnMessage.setOpaque(true);
+			lblRturnMessage.setBackground(Color.GREEN);
+			lblRturnMessage.setForeground(Color.RED);;
+			lblRturnMessage.setText("調劑成功 - 取藥數量:[" + takedQty + "]");
 			logger.info("調劑成功 - 藥品ID:[{}]; 取藥數量:[{}]; 已取數量:[{}]", 
 					medicineId, planQty, takedQty);
 		}

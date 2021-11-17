@@ -289,6 +289,14 @@ public class MainWindow extends JFrame {
 		this.loginUser = loginUser;
 	}
 	
+	public String getUserName() {
+		return loginUser.getData().getUserName() == null ? "" : loginUser.getData().getUserName().trim();
+	}
+	
+	public String getUserId() {
+		return loginUser.getData().getUserId().trim();
+	}
+	
 	public String getUserToken() {
 		return loginUser.getData().getToken();
 	}

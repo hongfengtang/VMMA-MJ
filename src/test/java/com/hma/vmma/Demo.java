@@ -15,6 +15,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
+
+import com.mmh.vmma.utils.CommonUtils;
+
 import java.net.MalformedURLException;
 
 /**Title: Demo.java
@@ -24,8 +27,9 @@ import java.net.MalformedURLException;
  * @date  2019-08-20 */
 public class Demo{
 
-    public static void main(String args[]){
+    public static void main(String args[]) throws Exception{
     	
+    	System.out.println(CommonUtils.getMacAdd());
     	String s = "藥物編號: 12345678:aaa ";
     	int i = s.indexOf(":");
     	String id = s.substring(i+1);

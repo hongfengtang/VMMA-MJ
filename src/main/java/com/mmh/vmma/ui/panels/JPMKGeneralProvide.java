@@ -105,6 +105,9 @@ implements ISignageCallBack{
 
 	//控件變量
 	private JCommonPanel jpTitle;
+	private JCommonPanel jpOptionBar;
+	private JCommonLabel lblUserId;
+	private JPlaintButton btnExit;
 	private JCommonLabel lblShowMessage;
 	
 	//barcode輸入區
@@ -149,6 +152,8 @@ implements ISignageCallBack{
 			}
 			@Override
 			public void componentShown(ComponentEvent e) {
+				System.out.println("員工號: " + mainWindow.getUserId() + "; 員工名: " + mainWindow.getUserName());
+				lblUserId.setText("員工號: " + mainWindow.getUserId() + "; 員工名: " + mainWindow.getUserName());
 //				resDrugInfo.clear();
 				txtBarcodeNo1.setText("");
 				txtBarcodeNo2.setText("");
@@ -167,10 +172,45 @@ implements ISignageCallBack{
 		jpTitle.setLayout(new BorderLayout(0, 0));
 		add(jpTitle, BorderLayout.NORTH);
 		
+		
+		jpOptionBar = new  JCommonPanel();
+		jpOptionBar.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				int width = jpOptionBar.getWidth();
+				int height = jpOptionBar.getHeight();
+				btnExit.setBounds(width - height, 0, height, height);
+				lblUserId.setBounds(0, 0, width - 10 - height, height);
+			}
+		});
+		jpOptionBar.setLayout(null);
+		jpOptionBar.setPreferredSize(new Dimension(0, 30));
+		jpTitle.add(jpOptionBar, BorderLayout.NORTH);
+		//退出按鈕選項
+		btnExit = new JPlaintButton(""); //退出
+		btnExit.setBounds(406, 5, 72, 32);
+		btnExit.setForeground(Color.WHITE);
+		btnExit.setFont(new Font("黑体", Font.PLAIN, 20));
+		btnExit.setBackground(new Color(181, 223, 226));
+		btnExit.setIcon(new ImageIcon("images/exitsys.png"));
+		btnExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				logger.debug("用戶選擇【退出】按鈕。");
+				
+				mainWindow.exitSystem();
+			}
+		});
+		jpOptionBar.add(btnExit);
+		
+		lblUserId = new JCommonLabel("");
+		lblUserId.setFont(new Font("黑體", Font.BOLD, 20));
+		lblUserId.setBounds(0, 0, 200, 30);
+		jpOptionBar.add(lblUserId);
+		
 		lblShowMessage = new JCommonLabel(title + "請掃描藥袋下方條碼");
-		lblShowMessage.setFont(new Font("楷体", Font.BOLD, 70));
+		lblShowMessage.setFont(new Font("楷体", Font.BOLD, 60));
 		lblShowMessage.setHorizontalAlignment(SwingConstants.CENTER);
-		jpTitle.add(lblShowMessage);
+		jpTitle.add(lblShowMessage, BorderLayout.CENTER);
 
 		jpBarcodeInput = new JCommonPanel();
 		jpBarcodeInput.addComponentListener(new ComponentAdapter() {
