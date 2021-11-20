@@ -5,7 +5,7 @@ server:
 logging:
   level:
     root: INFO
-    com.hma.vmma: TRACE
+    com.mmh.vmma: TRACE
   file: 
     name: logs/vmma.log
     max-size: 5MB

@@ -172,7 +172,7 @@ public class DlgMKDrugStatus extends JDialog{
 		lblQtyMax = new JCommonLabel("最大存量：");
 		lblQtyMax.setForeground(new Color(220, 20, 60));
 		lblQtyMax.setFont(new Font("楷体", Font.PLAIN, 20));
-		lblQtyMax.setBounds(249, 183, 233, 25);
+		lblQtyMax.setBounds(249, 220, 233, 25);
 		jpMedicineInfo.add(lblQtyMax);
 		
 		lblBoxId = new JCommonLabel("儲位編號:");

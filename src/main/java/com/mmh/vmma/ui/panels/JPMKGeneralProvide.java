@@ -107,8 +107,8 @@ implements ISignageCallBack{
 	private JCommonPanel jpTitle;
 	private JCommonPanel jpOptionBar;
 	private JCommonLabel lblUserId;
-	private JPlaintButton btnExit;
 	private JCommonLabel lblShowMessage;
+	private JRoundButton btnBack;
 	
 	//barcode輸入區
 	private JCommonPanel jpBarcodeInput;
@@ -117,7 +117,7 @@ implements ISignageCallBack{
 	private JCommonLabel lblBarcodeNo2;
 	private JCommonTextField txtBarcodeNo2;
 	private JRoundButton btnConfirm;
-	private JRoundButton btnBack;
+	private JRoundButton btnClear;
 	private JRoundButton btnTerminalDrugsStatus;
 	
 	//藥品庫存量告警顯示區
@@ -169,6 +169,17 @@ implements ISignageCallBack{
 		});
 		
 		jpTitle = new JCommonPanel();
+		jpTitle.addComponentListener(new ComponentAdapter() {
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+//				int width = jpTitle.getWidth();
+//				int height = jpTitle.getHeight();
+				btnBack.setPreferredSize(new Dimension(150, 0));
+
+			}
+			
+		});
 		jpTitle.setLayout(new BorderLayout(0, 0));
 		add(jpTitle, BorderLayout.NORTH);
 		
@@ -179,28 +190,12 @@ implements ISignageCallBack{
 			public void componentResized(ComponentEvent e) {
 				int width = jpOptionBar.getWidth();
 				int height = jpOptionBar.getHeight();
-				btnExit.setBounds(width - height, 0, height, height);
-				lblUserId.setBounds(0, 0, width - 10 - height, height);
+				lblUserId.setBounds(0, 0, width, height);
 			}
 		});
 		jpOptionBar.setLayout(null);
 		jpOptionBar.setPreferredSize(new Dimension(0, 30));
 		jpTitle.add(jpOptionBar, BorderLayout.NORTH);
-		//退出按鈕選項
-		btnExit = new JPlaintButton(""); //退出
-		btnExit.setBounds(406, 5, 72, 32);
-		btnExit.setForeground(Color.WHITE);
-		btnExit.setFont(new Font("黑体", Font.PLAIN, 20));
-		btnExit.setBackground(new Color(181, 223, 226));
-		btnExit.setIcon(new ImageIcon("images/exitsys.png"));
-		btnExit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				logger.debug("用戶選擇【退出】按鈕。");
-				
-				mainWindow.exitSystem();
-			}
-		});
-		jpOptionBar.add(btnExit);
 		
 		lblUserId = new JCommonLabel("");
 		lblUserId.setFont(new Font("黑體", Font.BOLD, 20));
@@ -211,6 +206,18 @@ implements ISignageCallBack{
 		lblShowMessage.setFont(new Font("楷体", Font.BOLD, 60));
 		lblShowMessage.setHorizontalAlignment(SwingConstants.CENTER);
 		jpTitle.add(lblShowMessage, BorderLayout.CENTER);
+
+		btnBack = new JRoundButton("退出");
+		btnBack.setFont(new Font("黑体", Font.BOLD, 23));
+		btnBack.setIcon(new ImageIcon("images/back.png"));
+		btnBack.setForeground(Color.WHITE);
+		btnBack.setBounds(291, 382, 143, 88);
+		btnBack.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				mainWindow.checkOptions(Settings.OPTIION_LOGIN, "登錄");
+			}
+		});
+		jpTitle.add(btnBack, BorderLayout.EAST);
 
 		jpBarcodeInput = new JCommonPanel();
 		jpBarcodeInput.addComponentListener(new ComponentAdapter() {
@@ -247,7 +254,7 @@ implements ISignageCallBack{
 				
 				x += btnWidth;
 				x+= gap;
-				btnBack.setBounds(x, y, btnWidth, btnHeight);
+				btnClear.setBounds(x, y, btnWidth, btnHeight);
 				
 				x += btnWidth;
 				x+=gap;
@@ -365,17 +372,19 @@ implements ISignageCallBack{
 		btnConfirm.setBounds(106, 382, 300, 100);
 		jpBarcodeInput.add(btnConfirm);
 
-		btnBack = new JRoundButton("返回");
-		btnBack.setFont(new Font("黑体", Font.BOLD, 30));
-		btnBack.setIcon(new ImageIcon("images/back.png"));
-		btnBack.setForeground(Color.WHITE);
-		btnBack.setBounds(291, 382, 143, 88);
-		btnBack.addActionListener(new ActionListener() {
+		btnClear = new JRoundButton("清除");
+		btnClear.setFont(new Font("黑体", Font.BOLD, 30));
+		btnClear.setIcon(new ImageIcon("images/clear.png"));
+		btnClear.setForeground(Color.WHITE);
+		btnClear.setBounds(291, 382, 143, 88);
+		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				mainWindow.checkOptions(Settings.OPTIION_LOGIN, "登錄");
+				txtBarcodeNo1.setText("");
+				txtBarcodeNo2.setText("");
+				txtBarcodeNo1.requestFocus();
 			}
 		});
-		jpBarcodeInput.add(btnBack);
+		jpBarcodeInput.add(btnClear);
 		
 		btnTerminalDrugsStatus = new JRoundButton("即時藥存量");
 		btnTerminalDrugsStatus.setFont(new Font("黑体", Font.BOLD, 30));
@@ -551,8 +560,10 @@ implements ISignageCallBack{
 				int i = 0;
 				String showText = title + "正在讀取藥訊息";
 				while (!isReading){
+					i++;
 					try{
 						if(i >= 10) {
+							i = 0;
 							showText = title + "正在讀取藥訊息";
 						}
 						showText += ".";
@@ -570,11 +581,6 @@ implements ISignageCallBack{
 		
 		if (resProvideQuery == null) {
 			lblShowMessage.setText(title + "讀取取藥訊息錯誤。");
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 			return false;
 		}
 		
@@ -583,12 +589,6 @@ implements ISignageCallBack{
 		lblShowMessage.setText(title + "準備取藥......");
 		if (data.getMedicinedata().size() <= 0) {
 			lblShowMessage.setText(title + "沒有待取藥物列表。");
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			
 			return false;
 		}
 		txtBarcodeNo1.setText("");
@@ -620,7 +620,7 @@ implements ISignageCallBack{
 			
 			if(ResponseCode.OK != Integer.valueOf(resProvideQuery.getResult())) {
 				logger.error("讀取藥品列表錯誤, 原因: {}", resProvideQuery.getMessage());
-				JOptionPane.showMessageDialog(null,  "讀取取藥訊息錯誤！！","錯誤",
+				JOptionPane.showMessageDialog(null,  resProvideQuery.getMessage() ,"錯誤",
 						JOptionPane.ERROR_MESSAGE);
 				return null;
 			}

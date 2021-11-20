@@ -15,7 +15,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -38,6 +39,7 @@ import com.mmh.vmma.ui.templates.JCommonLabel;
 import com.mmh.vmma.ui.templates.JCommonPanel;
 import com.mmh.vmma.ui.templates.JCommonTextField;
 import com.mmh.vmma.ui.templates.JPKeyboard;
+import com.mmh.vmma.ui.templates.JPlaintButton;
 import com.mmh.vmma.ui.templates.JRoundButton;
 
 /**
@@ -70,6 +72,8 @@ public class JPUserLogin extends JCommonPanel {
 	
 	//用戶ID登錄窗口
 	private JCommonPanel jpUerIdTitle;
+	private JCommonPanel jpOptionBar;
+	private JPlaintButton btnExit;
 	private JCommonLabel lblUserIdShowMessage;
 	private JCommonPanel jpLoginInfo;
 	private JCommonLabel lblUserID;
@@ -116,10 +120,47 @@ public class JPUserLogin extends JCommonPanel {
 		add(jpUerIdTitle, BorderLayout.NORTH);
 		jpUerIdTitle.setLayout(new BorderLayout(0, 0));
 		
+		jpOptionBar = new  JCommonPanel();
+		jpOptionBar.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				int width = jpOptionBar.getWidth();
+				int height = jpOptionBar.getHeight();
+				btnExit.setBounds(width - height, 0, height, height);
+			}
+		});
+		jpOptionBar.setLayout(null);
+		jpOptionBar.setPreferredSize(new Dimension(0, 30));
+		jpUerIdTitle.add(jpOptionBar, BorderLayout.NORTH);
+		//退出按鈕選項
+		btnExit = new JPlaintButton(""); //退出
+		btnExit.setBounds(406, 5, 72, 32);
+		btnExit.setForeground(Color.WHITE);
+		btnExit.setFont(new Font("黑体", Font.PLAIN, 20));
+		btnExit.setBackground(new Color(181, 223, 226));
+		btnExit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				btnExit.setIcon(new ImageIcon("images/exitsys.png"));
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				btnExit.setIcon(new ImageIcon(""));
+			}
+		});
+		btnExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				logger.debug("用戶選擇【退出】按鈕。");
+				
+				mainWindow.exitSystem();
+			}
+		});
+		jpOptionBar.add(btnExit);
+		
 		lblUserIdShowMessage = new JCommonLabel("請輸入員工編號");
 		lblUserIdShowMessage.setFont(new Font("楷体", Font.BOLD, 70));
 		lblUserIdShowMessage.setHorizontalAlignment(SwingConstants.CENTER);
-		jpUerIdTitle.add(lblUserIdShowMessage);
+		jpUerIdTitle.add(lblUserIdShowMessage, BorderLayout.CENTER);
 		
 		//用戶名密碼登錄窗口
 

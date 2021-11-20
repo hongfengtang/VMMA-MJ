@@ -18,6 +18,7 @@ import lombok.Data;
  */
 @Data
 public abstract class FlowFactory {
+	private String id;										//唯一標識
 	private ACTION_TYPE type = ACTION_TYPE.NONE;			//流程類型，可能有：出貨，心跳，查詢動作
 	private int count = 1;									//執行次數
 	private int steps = 0;									//共幾步

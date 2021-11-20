@@ -20,6 +20,7 @@ public class CODES {
 	public final static int ERR_CONNECT_VM=5;
 
 	//販賣機取藥處理結果碼
+	public final static int PROV_VM_START = 600;
 	public final static int PROV_VM_PROCESS = 601;
 	public final static int ERR_VM_STATUS = 501;
 	public final static int ERR_VM_NO_GOOD = 502;

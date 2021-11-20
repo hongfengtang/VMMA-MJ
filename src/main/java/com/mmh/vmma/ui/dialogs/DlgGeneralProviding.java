@@ -418,6 +418,8 @@ implements ISignageCallBack{
 				
 				String key = medicine.getMedicineId().trim() + "-" + box.getBoxId().trim();
 				MedicineResult mr = new MedicineResult();
+				mr.setMedicineIndex(medicineIndex);
+				mr.setBoxIndex(boxIndex);
 				mr.setMedicineId(medicineId);
 				mr.setBoxId(box.getBoxId().trim());
 				mr.setProvided(false);
@@ -425,8 +427,7 @@ implements ISignageCallBack{
 				mr.setTakedQty(0.0d);
 				mapMedicinesResult.put(key, mr);
 				
-				setPageItems(medicineIndex, boxIndex);
-				Vendout vendout = new Vendout(Integer.valueOf(box.getBoxId()), (int)Math.ceil(box.getTakeQty()), this);
+				Vendout vendout = new Vendout(key, Integer.valueOf(box.getBoxId()), (int)Math.ceil(box.getTakeQty()), this);
 				
 				planTakeTimes++;
 				requestQueue.push(vendout);
@@ -473,7 +474,9 @@ implements ISignageCallBack{
 			}
 			reqProvideResult.getData().getMedicinedata().addAll(lsMedicinesData);
 	
+			logger.debug("privide result request: [{}]", reqProvideResult.toString());
 			ResProvideResult resProvideResult = restProvideResult.doPost(reqProvideResult);
+			logger.debug("provide result response: [{}]", resProvideResult.toString());
 			if (ResponseCode.OK != Integer.valueOf(resProvideResult.getResult())) {
 				logger.error("調劑-回寫取藥結果錯誤, 原因: {}", resProvideResult.getMessage());
 				lblRturnMessage.setOpaque(true);
@@ -493,6 +496,15 @@ implements ISignageCallBack{
 	@Override
 	public void update(ResponseMessage message) {
 		logger.debug("get message.");
+		
+		if(message.getCode() == CODES.PROV_VM_START) {
+			if (message.getMessage() != null) {
+				String key = message.getMessage().trim();
+				MedicineResult mrStart = mapMedicinesResult.get(key);
+				setPageItems(mrStart.getMedicineIndex(), mrStart.getBoxIndex());
+			}
+			return;
+		}
 		int index = lblMedicineID.getText().indexOf(":");
 		String medicineId = lblMedicineID.getText().substring(index + 1).trim();
 		int takedQty = mapMedicinesProviding.get(medicineId) == null ? 0 : mapMedicinesProviding.get(medicineId);
@@ -515,9 +527,11 @@ implements ISignageCallBack{
 			return;
 		}
 
+		int columnTakeTimes = 0;
 		takedTimes++;
 
 		if(message.getCode() != CODES.SUCCESS) {
+			columnTakeTimes = message.getLoop() - 1;
 			takedQty--;
 			mapMedicinesProviding.put(medicineId, takedQty);
 			status = CONSTANTS.ERR_PROVIDE;
@@ -531,6 +545,7 @@ implements ISignageCallBack{
 		
 			//更新接口，取藥成功
 			status = CONSTANTS.SUCCESS;
+			columnTakeTimes = message.getLoop();
 			lblRturnMessage.setOpaque(true);
 			lblRturnMessage.setBackground(Color.GREEN);
 			lblRturnMessage.setForeground(Color.RED);;
@@ -540,7 +555,7 @@ implements ISignageCallBack{
 		}
 		
 		MedicineResult mr = mapMedicinesResult.get(medicineId + "-" + boxId);
-		mr.setTakedQty(takedQty);
+		mr.setTakedQty(columnTakeTimes);
 		mr.setProvided(true);
 		mr.setStatus(status);
 		mapMedicinesResult.put(medicineId + "-" + boxId, mr);
@@ -561,6 +576,8 @@ implements ISignageCallBack{
 	
 	@Data
 	class MedicineResult {
+		private int medicineIndex;
+		private int boxIndex;
 		private String medicineId;
 		private String boxId;
 		private double takedQty = 0.0d;

@@ -36,8 +36,9 @@ public class Vendout extends FlowFactory{
 	
 	private final static int STEPS = 4;
 	
-	public Vendout(int column, int count, ISignageCallBack callBack) {
+	public Vendout(String id, int column, int count, ISignageCallBack callBack) {
 		
+		setId(id);
 		setCallBack(callBack);
 		setType(ACTION_TYPE.VENDOUT);
 		setCount(count);
@@ -85,6 +86,7 @@ public class Vendout extends FlowFactory{
 
 	@Override
 	public boolean start(SignageIFClient signage, ResponseQueue responseQ) {
+		updateCallback(CODES.PROV_VM_START, 0, getId());
 		for (int i = 0; i < getCount(); i++) {	//共取藥次數
 			updateCallback(CODES.PROV_VM_PROCESS, i+1, "");
 			int retryTimes = 0;
