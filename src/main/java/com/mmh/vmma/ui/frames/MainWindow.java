@@ -121,7 +121,7 @@ public class MainWindow extends JFrame {
 //		setAlwaysOnTop(true);
 		
 		//是否在任务栏显示窗口
-//		setType(Type.UTILITY);
+		setType(Type.UTILITY);
 		
 		setResizable(false);
 		

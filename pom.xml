@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.hma.vmma</groupId>
 	<artifactId>MMH-VMMA</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>MMH-VMMA</name>
 	<description>MacKay Memorial Hospital - Veding Machine Medicine Assistant</description>
 	<properties>

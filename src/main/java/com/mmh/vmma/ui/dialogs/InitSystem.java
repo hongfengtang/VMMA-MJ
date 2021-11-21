@@ -266,6 +266,7 @@ public class InitSystem extends JDialog {
 		gData.setCcBaseUrl(ccConfigurations.getAddress());
 		//init device
 		try {
+			logger.debug("Mac address: [{}]", CommonUtils.getMacAdd());
 			ReqDeviceInit reqDeviceInit = new ReqDeviceInit();
 			reqDeviceInit.getData().setTerminalId(gData.getTerminalId());
 			reqDeviceInit.getData().setTermType(CODES.TERM_TYPE_VM);
@@ -285,7 +286,7 @@ public class InitSystem extends JDialog {
 //					JOptionPane.ERROR_MESSAGE);
 			//@TODO only for debug, will be delete
 			//***********************************************************************************//
-			setResult(CODES.ERR_CONNECT_CENTER_CONTROL);
+//			setResult(CODES.ERR_CONNECT_CENTER_CONTROL);
 			//***********************************************************************************//
 			return;
 		}

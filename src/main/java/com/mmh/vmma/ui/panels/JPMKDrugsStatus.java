@@ -169,7 +169,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		
 		//搜索區
 		jpSearch = new JCommonPanel();
-		jpSearch.setPreferredSize(new Dimension(0, 50));
+		jpSearch.setPreferredSize(new Dimension(0, 0));
 		jpMedicines.add(jpSearch, BorderLayout.NORTH);
 		jpSearch.setLayout(null);
 		
@@ -227,7 +227,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		jpMedicines.add(srpMedicines);
 
 		srpMedicines.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
-		srpMedicines.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "請選擇藥品", 
+		srpMedicines.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", 
 				TitledBorder.CENTER, TitledBorder.TOP, new Font("宋体", Font.PLAIN, 20), new Color(255, 0, 0)));
 
 		tblMedicines = new JCommonTable();
@@ -266,7 +266,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 			}
 		});
 		jpFunctionButton.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", 
-				TitledBorder.CENTER, TitledBorder.TOP, null, new Color(255, 0, 0)));
+				TitledBorder.CENTER, TitledBorder.TOP, null, new Color(0, 0, 0)));
 		jpFunctionButton.setPreferredSize(new Dimension(0, nFunctionButtonWidth));
 		add(jpFunctionButton, BorderLayout.SOUTH);
 		
