@@ -22,7 +22,9 @@ import org.springframework.stereotype.Component;
 
 import com.mmh.vmma.controlcenter.CONSTANTS;
 import com.mmh.vmma.controlcenter.ResponseCode;
+import com.mmh.vmma.controlcenter.RestfulProvideQuery;
 import com.mmh.vmma.controlcenter.RestfulProvideResult;
+import com.mmh.vmma.controlcenter.model.request.ReqProvideQuery;
 import com.mmh.vmma.controlcenter.model.request.ReqProvideResult;
 import com.mmh.vmma.controlcenter.model.response.ResProvideQuery;
 import com.mmh.vmma.controlcenter.model.response.ResProvideResult;
@@ -35,6 +37,7 @@ import com.mmh.vmma.ui.common.ResponseMessage;
 import com.mmh.vmma.ui.frames.MainWindow;
 import com.mmh.vmma.ui.templates.JCommonLabel;
 import com.mmh.vmma.ui.templates.JCommonPanel;
+import com.mmh.vmma.ui.templates.JCommonTextField;
 import com.mmh.vmma.ui.templates.JRoundButton;
 import com.mmh.vmma.utils.AESUtils;
 import com.mmh.vmma.utils.CommonUtils;
@@ -43,35 +46,46 @@ import lombok.Data;
 
 import javax.swing.UIManager;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 @Component
-public class DlgGeneralProviding extends JDialog
+public class DlgBatchProvide extends JDialog
 implements ISignageCallBack{
 
 	private static final long serialVersionUID = 1L;
 
-	private static final Logger logger = LogManager.getLogger(DlgGeneralProviding.class);
+	private static final Logger logger = LogManager.getLogger(DlgBatchProvide.class);
 	
-	@Autowired
-	private MainWindow mainWindow;	
-	@Autowired
-	private RequestQueue requestQueue;
-	@Autowired
-	private RestfulProvideResult restProvideResult;
+	private static final String BARCODENO1 = "MMH001";
+//	private static final String BARCODENO2 = "MMH001";
 	
 	@Autowired
 	private GlobalData globalData;
 
+	@Autowired
+	private MainWindow mainWindow;
+	
+	@Autowired
+	private RequestQueue requestQueue;
+	
+	@Autowired
+	private RestfulProvideQuery restProvideQuery;
+	
+	@Autowired
+	private RestfulProvideResult restProvideResult;
 	
 	//自定義變量
+	private String medicineId = "";
+	private double stockQty = 0.0d;
 	private ResProvideQuery.DataField medicines = null;
 	private int planQty = 0;
 	private int planTakeTimes = 0;
@@ -81,8 +95,6 @@ implements ISignageCallBack{
 	private HashMap<String, Integer> mapMedicinesProviding = new HashMap<String, Integer>();
 	private HashMap<String, MedicineResult> mapMedicinesResult = new HashMap<String, MedicineResult>();
 	
-//	private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
 	private int drugQtyNow  = -1;
 	
 	//窗口組件
@@ -91,81 +103,39 @@ implements ISignageCallBack{
 	private JCommonLabel lblWarning;
 	private JCommonLabel lblMedicinePhoto;
 	
-	//病患信息
-	private JCommonPanel jpPatientInfo;
-	private JCommonLabel lblChartNo;
-	private JCommonLabel lblPatientName;
-	private JCommonLabel lblMedNo;
-	private JCommonLabel lblScrn;
-	private JCommonLabel lblFq;
-	
 	//藥品詳細信息
 	private JCommonPanel jpMedicineInfo;
 	private JCommonLabel lblMedicineID;
 	private JCommonLabel lblMedicineName;
-	private JCommonLabel lblBarcodeNo1;
-	private JCommonLabel lblBarcodeNo2;
-	private JCommonLabel lblMedicineUnit;
 	private JCommonLabel lblBoxId;
 	private JCommonLabel lblBoxQuantityNow;
 	private JCommonLabel lblPlanSupply;
+	private JCommonTextField textPlanSupply;
+	private JRoundButton btnMinus;
+	private JRoundButton btnPlus;
+	
 
 	//返回消息
 	private JCommonLabel lblRturnMessage;
 
 	//確認按鈕
-	private JRoundButton okButton;
+	private JRoundButton btnCancel;
+	private JRoundButton btnOK;
 
 	/**
 	 * Create the dialog.
 	 */
-	public DlgGeneralProviding() {
+	public DlgBatchProvide() {
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentShown(ComponentEvent e) {
-				okButton.setEnabled(false);
-				if (medicines == null) {
-					lblRturnMessage.setOpaque(true);
-					lblRturnMessage.setBackground(Color.YELLOW);
-					lblRturnMessage.setText("缺少病患或取藥訊息！！");
-					okButton.setEnabled(true);
-					return;
-				}
-				//開始取藥
-				lblRturnMessage.setOpaque(true);
-				lblRturnMessage.setBackground(Color.GREEN);
-				lblRturnMessage.setText("請稍後，正在取藥!……");
-				okButton.setEnabled(false);
-				
-				providingMedicine();
+				medicines = null;
+
 			}
 		});
 		init();
 		
-		subcriberMessage();
-		
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowOpened(WindowEvent e) {
-//				okButton.setEnabled(false);
-//				if ((patientSelected == null) || (medicine == null)) {
-//					lblRturnMessage.setOpaque(true);
-//					lblRturnMessage.setBackground(Color.YELLOW);
-//					lblRturnMessage.setText("缺少病患或取藥信息！！");
-//					okButton.setEnabled(true);
-//					return;
-//				}
-//				//開始取藥
-//				lblRturnMessage.setOpaque(true);
-//				lblRturnMessage.setBackground(Color.GREEN);
-//				lblRturnMessage.setText("請稍後，正在取藥!……");
-//				okButton.setEnabled(false);
-//				
-//				providingMedicine(medicine.getBoxId().trim(), planQty);
-			}
-			
-		});
-		
+//		subcriberMessage();
 	}
 
 	//初始化窗口
@@ -176,18 +146,18 @@ implements ISignageCallBack{
 //		setUndecorated(true);
 		setType(Type.UTILITY);
 		
-		setBounds(100, 100, 800, 750);
+		setBounds(100, 100, 850, 650);
 		setLocationRelativeTo(null);
 		
 		getContentPane().setLayout(null);
 		getContentPane().setBackground(new Color(181, 223, 226));
 		jpMedicine = new JCommonPanel();
-		jpMedicine.setBounds(0, 0, 748, 521);
+		jpMedicine.setBounds(0, 0, 748, 377);
 		jpMedicine.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(jpMedicine);
 		jpMedicine.setLayout(null);
 		
-		lblOpenMsg = new JCommonLabel("調劑操作確認");
+		lblOpenMsg = new JCommonLabel("批次取藥");
 		lblOpenMsg.setHorizontalAlignment(SwingConstants.CENTER);
 		lblOpenMsg.setForeground(new Color(0, 0, 128));
 		lblOpenMsg.setFont(new Font("楷体", Font.BOLD, 25));
@@ -209,12 +179,12 @@ implements ISignageCallBack{
 		jpMedicineInfo = new JCommonPanel();
 		jpMedicineInfo.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "藥品訊息", 
 				TitledBorder.LEADING, TitledBorder.TOP, new Font("楷体", Font.PLAIN, 22), new Color(220, 20, 60)));
-		jpMedicineInfo.setBounds(232, 55, 492, 245);
+		jpMedicineInfo.setBounds(232, 55, 492, 305);
 		jpMedicine.add(jpMedicineInfo);
 		jpMedicineInfo.setLayout(null);
 
 		lblMedicineID = new JCommonLabel("藥物編號:");
-		lblMedicineID.setBounds(10, 30, 472, 25);
+		lblMedicineID.setBounds(10, 40, 472, 25);
 		jpMedicineInfo.add(lblMedicineID);
 		lblMedicineID.setForeground(new Color(220, 20, 60));
 		lblMedicineID.setFont(new Font("楷体", Font.PLAIN, 20));
@@ -222,95 +192,118 @@ implements ISignageCallBack{
 		lblMedicineName = new JCommonLabel("藥物名稱:");
 		lblMedicineName.setForeground(new Color(220, 20, 60));
 		lblMedicineName.setFont(new Font("楷体", Font.PLAIN, 20));
-		lblMedicineName.setBounds(10, 65, 472, 25);
+		lblMedicineName.setBounds(10, 95, 472, 25);
 		jpMedicineInfo.add(lblMedicineName);
 		
-		lblBarcodeNo1 = new JCommonLabel("條 碼 1 :");
-		lblBarcodeNo1.setForeground(new Color(220, 20, 60));
-		lblBarcodeNo1.setFont(new Font("楷体", Font.PLAIN, 20));
-		lblBarcodeNo1.setBounds(10,100, 472, 25);
-		jpMedicineInfo.add(lblBarcodeNo1);
-		
-		lblBarcodeNo2 = new JCommonLabel("條 碼 2 :");
-		lblBarcodeNo2.setForeground(new Color(220, 20, 60));
-		lblBarcodeNo2.setFont(new Font("楷体", Font.PLAIN, 20));
-		lblBarcodeNo2.setBounds(10, 135, 472, 25);
-		jpMedicineInfo.add(lblBarcodeNo2);
-		
-		lblMedicineUnit = new JCommonLabel("藥物單位:");
-		lblMedicineUnit.setForeground(new Color(220, 20, 60));
-		lblMedicineUnit.setFont(new Font("楷体", Font.PLAIN, 20));
-		lblMedicineUnit.setBounds(10, 170, 230, 25);
-		jpMedicineInfo.add(lblMedicineUnit);
-		
-		lblBoxId = new JCommonLabel("儲位編號:");
-		lblBoxId.setForeground(new Color(220, 20, 60));
-		lblBoxId.setFont(new Font("楷体", Font.PLAIN, 20));
-		lblBoxId.setBounds(250, 170, 230, 25);
-		jpMedicineInfo.add(lblBoxId);
-		
 		lblBoxQuantityNow = new JCommonLabel("現存藥量:" );
-		lblBoxQuantityNow.setBounds(10, 200, 230, 25);
+		lblBoxQuantityNow.setBounds(10, 150, 230, 25);
 		lblBoxQuantityNow.setFont(new Font("楷体", Font.PLAIN, 20));
 		lblBoxQuantityNow.setForeground(new Color(220, 20, 60));
 		jpMedicineInfo.add(lblBoxQuantityNow);
 		
+		lblBoxId = new JCommonLabel("儲位編號:");
+		lblBoxId.setForeground(new Color(220, 20, 60));
+		lblBoxId.setFont(new Font("楷体", Font.PLAIN, 20));
+		lblBoxId.setBounds(10, 205, 230, 25);
+		jpMedicineInfo.add(lblBoxId);
+		
 		lblPlanSupply = new JCommonLabel("領 藥 量:");
 		lblPlanSupply.setForeground(new Color(220, 20, 60));
 		lblPlanSupply.setFont(new Font("楷体", Font.PLAIN, 20));
-		lblPlanSupply.setBounds(250, 200, 230, 25);
+		lblPlanSupply.setBounds(10, 260, 103, 25);
 		jpMedicineInfo.add(lblPlanSupply);
 		
-		jpPatientInfo = new JCommonPanel();
-		jpPatientInfo.setLayout(null);
-		jpPatientInfo.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "病患訊息", 
-				TitledBorder.LEADING, TitledBorder.TOP, new Font("楷体", Font.PLAIN, 22), new Color(0, 0, 140)));
-		jpPatientInfo.setBounds(232, 310, 492, 206);
-		jpMedicine.add(jpPatientInfo);
+		textPlanSupply = new JCommonTextField("0");
+		textPlanSupply.setBounds(120, 255, 250, 35);
+		textPlanSupply.setColumns(10);
+		textPlanSupply.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+		  		char ekey = e.getKeyChar();
+		  		if((ekey < '0' || ekey > '9') && (ekey != '.')){
+		  			e.setKeyChar('\0');
+		  		}
+			}
+		});
+		jpMedicineInfo.add(textPlanSupply);
 		
-		lblChartNo = new JCommonLabel("病 歷 號:");
-		lblChartNo.setBounds(10, 30, 472, 25);
-		jpPatientInfo.add(lblChartNo);
-		lblChartNo.setForeground(new Color(0, 0, 140));
-		lblChartNo.setFont(new Font("楷体", Font.PLAIN, 20));
-		
-		lblPatientName = new JCommonLabel("病患姓名:");
-		lblPatientName.setBounds(10, 65, 472, 25);
-		jpPatientInfo.add(lblPatientName);
-		lblPatientName.setForeground(new Color(0, 0, 140));
-		lblPatientName.setFont(new Font("楷体", Font.PLAIN, 20));
+		btnMinus = new JRoundButton("-");
+		btnMinus.setBounds(373, 255, 50, 35);
+		btnMinus.setFont(new Font("黑體", Font.BOLD, 25));
+		btnMinus.addActionListener(new ActionListener() {
 
-		lblMedNo = new JCommonLabel("領 藥 號:");
-		lblMedNo.setBounds(10, 100, 472, 25);
-		jpPatientInfo.add(lblMedNo);
-		lblMedNo.setForeground(new Color(0, 0, 140));
-		lblMedNo.setFont(new Font("楷体", Font.PLAIN, 20));
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String now = textPlanSupply.getText() == null ? "0" : textPlanSupply.getText();
+				if(Integer.valueOf(now) > 0) {
+					textPlanSupply.setText(String.valueOf(Integer.valueOf(now) - 1));
+					return;
+				}
+				
+				textPlanSupply.setText("0");
+			}
+			
+		});
+		jpMedicineInfo.add(btnMinus);
 
-		lblScrn = new JCommonLabel("處方日期:");
-		lblScrn.setBounds(10, 135, 472, 25);
-		jpPatientInfo.add(lblScrn);
-		lblScrn.setForeground(new Color(0, 0, 140));
-		lblScrn.setFont(new Font("楷体", Font.PLAIN, 20));
+		btnPlus = new JRoundButton("+");
+		btnPlus.setBounds(425, 255, 50, 35);
+		btnPlus.setFont(new Font("黑體", Font.BOLD, 25));
+		btnPlus.addActionListener(new ActionListener() {
 
-		lblFq = new JCommonLabel("頻    次:");
-		lblFq.setBounds(10, 170, 472, 25);
-		jpPatientInfo.add(lblFq);
-		lblFq.setForeground(new Color(0, 0, 140));
-		lblFq.setFont(new Font("楷体", Font.PLAIN, 20));
-		
-		okButton = new JRoundButton("確定");
-		okButton.setIcon(new ImageIcon("images/check.png"));
-		okButton.setForeground(new Color(245, 255, 250));
-		okButton.setBounds(547, 595, 172, 70);
-		getContentPane().add(okButton);
-		okButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String now = textPlanSupply.getText() == null ? "0" : textPlanSupply.getText();
+				if(Integer.valueOf(now) >= stockQty) {
+					textPlanSupply.setText(String.valueOf((int) Math.floor(stockQty)));
+					return;
+				}
+				
+				textPlanSupply.setText(String.valueOf(Integer.valueOf(now) + 1));
+			}
+			
+		});
+		jpMedicineInfo.add(btnPlus);
+
+		btnCancel = new JRoundButton("返回");
+		btnCancel.setIcon(new ImageIcon("images/back.png"));
+		btnCancel.setForeground(new Color(245, 255, 250));
+		btnCancel.setBounds(227, 491, 172, 70);
+		getContentPane().add(btnCancel);
+		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				closeWindow();
 			}
 		});
+
+		btnOK = new JRoundButton("確定");
+		btnOK.setIcon(new ImageIcon("images/check.png"));
+		btnOK.setForeground(new Color(245, 255, 250));
+		btnOK.setBounds(546, 491, 172, 70);
+		getContentPane().add(btnOK);
+		btnOK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int takeQty = Integer.valueOf(textPlanSupply.getText().trim());
+				
+				if (takeQty <= 0) {
+					lblRturnMessage.setOpaque(true);
+					lblRturnMessage.setBackground(Color.YELLOW);
+					lblRturnMessage.setText("取藥數量不能低于0。");
+					return;
+				}
+				btnOK.setEnabled(false);
+				btnCancel.setEnabled(false);
+				if(getDrugInfo(medicineId, takeQty)) {
+					providingMedicine();
+					return;
+				}
+				btnOK.setEnabled(true);
+				btnCancel.setEnabled(true);
+			}
+		});
 		
 		lblRturnMessage = new JCommonLabel("");
-		lblRturnMessage.setBounds(21, 529, 699, 56);
+		lblRturnMessage.setBounds(20, 404, 699, 56);
 		lblRturnMessage.setOpaque(false);
 		lblRturnMessage.setForeground(new Color(255, 0, 0));
 		lblRturnMessage.setBackground(Color.YELLOW);
@@ -318,32 +311,13 @@ implements ISignageCallBack{
 		getContentPane().add(lblRturnMessage);
 	}
 	
-	public void setMedicine(ResProvideQuery.DataField medicines) {
-		this.medicines = medicines;
-		if((medicines == null) || medicines.getMedicinedata().size() <= 0){
-			lblMedicineID.setText("藥物編號: N/A");
-			lblMedicineName.setText("藥物名稱: N/A");
-			lblBarcodeNo1.setText("條 碼 1 : N/A");
-			lblBarcodeNo2.setText("條 碼 2 :N/A");
-			lblMedicineUnit.setText("藥物單位:N/A");
-			lblBoxId.setText("儲位編號: N/A");
-			lblBoxQuantityNow.setText("現存藥量: N/A" );
-			lblPlanSupply.setText("領 藥 量：N/A");
-			
-			lblChartNo.setText("病 歷 號: N/A");
-			lblPatientName.setText("病患姓名: N/A");
-			lblMedNo.setText("領 藥 號: N/A");
-			lblScrn.setText("處方日期: N/A");
-			lblFq.setText("頻    次: N/A");
-
-			lblRturnMessage.setOpaque(true);
-			lblRturnMessage.setBackground(Color.YELLOW);
-			lblRturnMessage.setText("無取藥訊息。");
-			
-		}else{
-
-			setPageItems(0, 0);
-		}
+	public void setMedicine(String medicineId, String medicineName, double stockQty) {
+		this.medicineId = medicineId;
+		this.stockQty = stockQty;
+		lblMedicineID.setText("藥物編號: " + medicineId.trim());
+		lblMedicineName.setText("藥物名稱: " + medicineName.trim());
+		lblBoxId.setText("儲位編號: N/A");
+		lblBoxQuantityNow.setText("現存藥量: " + String.valueOf(stockQty));
 	}
 	
 	//根據輸入參數, 設置窗口顯示內容
@@ -356,27 +330,10 @@ implements ISignageCallBack{
 		lblMedicineName.setText("藥物名稱：" + 
 				(medicines.getMedicinedata().get(medicineIndex).getMedicineName() == null ? "" : 
 					medicines.getMedicinedata().get(medicineIndex).getMedicineName().trim()));
-		lblBarcodeNo1.setText("條 碼 1 : " + 
-				(medicines.getBarcodeNo1() == null ? "" : medicines.getBarcodeNo1().trim()));
-		lblBarcodeNo2.setText("條 碼 2 : " + 
-				(medicines.getBarcodeNo2() == null ? "" : medicines.getBarcodeNo2().trim()));
-		lblMedicineUnit.setText("藥物單位: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getDoseUnit() == null ? "" : 
-					medicines.getMedicinedata().get(medicineIndex).getDoseUnit().trim()));;
 		lblBoxId.setText("儲位編號: " + boxId);
 		lblBoxQuantityNow.setText("現存藥量: " + String.valueOf(stockQty));
 		lblPlanSupply.setText("領 藥 量: " + String.valueOf(planQty));
 		
-		lblChartNo.setText("病 歷 號: " + (medicines.getChartNo() == null ? "" : medicines.getChartNo().trim()));
-		lblPatientName.setText("病患姓名: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getPatientName() == null ? "" : medicines.getMedicinedata().get(medicineIndex).getPatientName().trim()));
-		lblMedNo.setText("領 藥 號: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getMedNo() == null ? "" : medicines.getMedicinedata().get(medicineIndex).getMedNo().trim()));
-		lblScrn.setText("處方日期: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getScrn() == null ? "" : medicines.getMedicinedata().get(medicineIndex).getScrn().trim()));
-		lblFq.setText("頻    次: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getFq() == null ? "" : medicines.getMedicinedata().get(medicineIndex).getFq().trim()));
-
 		BigDecimal bd1 = new BigDecimal(planQty);
 		BigDecimal bd2 = new BigDecimal(stockQty);
 		
@@ -385,7 +342,7 @@ implements ISignageCallBack{
 			lblRturnMessage.setBackground(Color.YELLOW);
 			lblRturnMessage.setText("計劃領藥數據量大於藥盒現有數量，無法繼續領藥!");
 			logger.error("計劃領藥失敗 - 計劃領藥數據量大於藥盒現有數量，無法繼續領藥!");
-			okButton.setEnabled(true);
+			btnOK.setEnabled(true);
 			return;
 		}
 		lblRturnMessage.setOpaque(false);
@@ -402,7 +359,49 @@ implements ISignageCallBack{
 
 
 	}
-		
+	
+	private boolean getDrugInfo(String medicineId, int takeQty){
+
+		try {
+			String barcodeNo2 = (new SimpleDateFormat("yyyyMMddHHmmss")).format(new Date());
+			ReqProvideQuery reqProvideQuery = new ReqProvideQuery();
+			reqProvideQuery.setToken(mainWindow.getUserToken());
+			reqProvideQuery.getData().setTerminalId(globalData.getTerminalId());
+			reqProvideQuery.getData().setChartNo("");
+			reqProvideQuery.getData().setPhrOrderNo("");
+			reqProvideQuery.getData().setBarcodeNo1(BARCODENO1);
+			reqProvideQuery.getData().setBarcodeNo2(barcodeNo2);
+			
+			ReqProvideQuery.MedicineData medicineData = new ReqProvideQuery.MedicineData();
+			medicineData.setBoxId("");
+			medicineData.setMedicineId(medicineId);
+			medicineData.setTakeQty(takeQty);
+			reqProvideQuery.getData().getMedicinedata().add(medicineData);
+			
+			ResProvideQuery resProvideQuery = restProvideQuery.doPost(reqProvideQuery);
+			
+			
+			
+			if(ResponseCode.OK != Integer.valueOf(resProvideQuery.getResult())) {
+				logger.error("讀取藥品列表錯誤, 原因: {}", resProvideQuery.getMessage());
+				lblRturnMessage.setOpaque(true);
+				lblRturnMessage.setBackground(Color.YELLOW);
+				lblRturnMessage.setText("讀取藥品列表錯誤, 原因: " + resProvideQuery.getMessage());
+				return false;
+			}
+			
+			medicines = resProvideQuery.getData();
+			return true;
+			
+		}catch(Throwable e) {
+			logger.error("讀取藥品列表錯誤!", e);
+			lblRturnMessage.setOpaque(true);
+			lblRturnMessage.setBackground(Color.YELLOW);
+			lblRturnMessage.setText("讀取藥品列表錯誤!");
+			return false;
+		}
+	}
+	
 	private void providingMedicine() {
 		mapMedicinesProviding.clear();
 		mapMedicinesResult.clear();
@@ -437,16 +436,7 @@ implements ISignageCallBack{
 		}
 	}
 	
-	private void subcriberMessage(){
-//		FirmwareAccess.getInstance().subcriberMessage(this);
-	}
-	
-	private void unsubcriberMessage(){
-//		FirmwareAccess.getInstance().unsubcriberMessage(this);
-	}
-	
 	private void closeWindow(){
-		unsubcriberMessage();
 		medicines = null;
 		dispose();
 	}
@@ -561,7 +551,9 @@ implements ISignageCallBack{
 		mapMedicinesResult.put(medicineId + "-" + boxId, mr);
 		
 		if(takedTimes >= planTakeTimes) {
-			okButton.setEnabled(true);
+			btnOK.setEnabled(true);
+			btnCancel.setEnabled(true);
+
 			updateProvidedResult();
 		}
 	}

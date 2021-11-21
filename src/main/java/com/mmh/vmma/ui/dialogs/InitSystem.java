@@ -286,7 +286,7 @@ public class InitSystem extends JDialog {
 //					JOptionPane.ERROR_MESSAGE);
 			//@TODO only for debug, will be delete
 			//***********************************************************************************//
-//			setResult(CODES.ERR_CONNECT_CENTER_CONTROL);
+			setResult(CODES.ERR_CONNECT_CENTER_CONTROL);
 			//***********************************************************************************//
 			return;
 		}

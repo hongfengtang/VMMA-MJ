@@ -403,7 +403,7 @@ implements ISignageCallBack{
 		add(jpAlarmDrugs, BorderLayout.SOUTH);
 		jpAlarmDrugs.setLayout(new BorderLayout(0,0));
 		jspAlarmDrugsList = new JScrollPane();
-		jspAlarmDrugsList.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "告警藥品列表", 
+		jspAlarmDrugsList.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "藥品補藥提示列表", 
 				TitledBorder.LEFT, TitledBorder.TOP, new Font("黑体", Font.BOLD, 25), new Color(255, 0, 0)));
 
 		jspAlarmDrugsList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);

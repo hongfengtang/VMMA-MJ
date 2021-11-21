@@ -36,9 +36,6 @@ public class RestfulProvideQuery implements IRestfulClient {
 		request.setClientId(Optional.ofNullable(request.getClientId()).orElse(globalData.getTerminalId()));
 		request.setDatetime(Optional.ofNullable(request.getDatetime()).orElse(CommonUtils.getDateTime()));
 		String resGSR = (String)doPost(url, request, String.class);
-		System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-		System.out.println(resGSR);
-		System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 		return JSONArray.parseObject(resGSR, ResProvideQuery.class);
 //		return (ResProvide)doPost(url, request, ResProvide.class);
 	}

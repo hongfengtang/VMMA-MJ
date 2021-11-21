@@ -31,6 +31,7 @@ import com.mmh.vmma.controlcenter.model.request.ReqTMedicines;
 import com.mmh.vmma.controlcenter.model.response.ResTMedicines;
 import com.mmh.vmma.ui.common.GlobalData;
 import com.mmh.vmma.ui.common.Settings;
+import com.mmh.vmma.ui.dialogs.DlgBatchProvide;
 import com.mmh.vmma.ui.dialogs.DlgMKDrugStatus;
 import com.mmh.vmma.ui.frames.MainWindow;
 import com.mmh.vmma.ui.templates.JCommonLabel;
@@ -55,6 +56,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import java.awt.event.MouseAdapter;
+import java.math.BigDecimal;
 
 @Component
 public class JPMKDrugsStatus extends JCommonPanel {
@@ -75,6 +77,9 @@ public class JPMKDrugsStatus extends JCommonPanel {
 	
 	@Autowired
 	private RestfulTMMedicines restTerminalMedicines;
+	
+	@Autowired
+	private DlgBatchProvide dlgMKBtchProvide;
 	
 	//自定義變量
 	private int totalRows = 0; 				//記錄共有多少條
@@ -117,6 +122,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 	//按鈕區
 	private JCommonPanel jpFunctionButton;
 	private JPlaintButton btnShowDetail;
+	private JPlaintButton btnBatchProvide;
 	private JPlaintButton btnBack;
 
 	
@@ -159,8 +165,10 @@ public class JPMKDrugsStatus extends JCommonPanel {
 			public void componentShown(ComponentEvent e) {
 				if(tblMedicines.getSelectedRow() >= 0){
 					btnShowDetail.setEnabled(true);
+					btnBatchProvide.setEnabled(true);
 				}else{
 					btnShowDetail.setEnabled(false);
+					btnBatchProvide.setEnabled(false);
 				}
 			}
 		});
@@ -231,7 +239,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 				TitledBorder.CENTER, TitledBorder.TOP, new Font("宋体", Font.PLAIN, 20), new Color(255, 0, 0)));
 
 		tblMedicines = new JCommonTable();
-		tblMedicines.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		tblMedicines.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);//.SINGLE_INTERVAL_SELECTION);
 		srpMedicines.setViewportView(tblMedicines);
 		tblMedicines.addMouseListener(new MouseAdapter() {
 
@@ -241,8 +249,10 @@ public class JPMKDrugsStatus extends JCommonPanel {
 			public void valueChanged(ListSelectionEvent e) {
 				if(tblMedicines.getSelectedRow() >= 0){
 					btnShowDetail.setEnabled(true);
+					btnBatchProvide.setEnabled(true);
 				}else{
 					btnShowDetail.setEnabled(false);
+					btnBatchProvide.setEnabled(false);
 				}
 			}
 			
@@ -263,6 +273,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 				int btnGap = 5;
 				btnBack.setBounds(jpWidth - 2 * (btnWidth + btnGap), btnGap, btnWidth, btnHeight);
 				btnShowDetail.setBounds(jpWidth - (btnWidth + btnGap), btnGap, btnWidth, btnHeight);
+				btnBatchProvide.setBounds(btnGap, btnGap, btnWidth, btnHeight);
 			}
 		});
 		jpFunctionButton.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "", 
@@ -311,6 +322,41 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		});
 		jpFunctionButton.add(btnShowDetail);
 		
+		btnBatchProvide = new JPlaintButton("批次取藥");
+		btnBatchProvide.setIcon(new ImageIcon("images/medicines.png"));
+		btnBatchProvide.setBounds(401, 7, 80, 50);
+		btnBatchProvide.setEnabled(false);
+		btnBatchProvide.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int row = tblMedicines.getSelectedRow();
+				String selectedMedicineID = ((String)tblMedicines.getValueAt(row, 0)).trim();
+				String selectedBoxId = ((String)tblMedicines.getValueAt(row, 5)).trim();
+				for(VMMedicine medicine : lsVMMedicines){
+					if((medicine.getMedicineId().equalsIgnoreCase(selectedMedicineID)) &&
+							medicine.getBoxId().equalsIgnoreCase(selectedBoxId)){
+						
+						BigDecimal bd1 = new BigDecimal(medicine.getTotalQuantity());
+						BigDecimal bd2 = new BigDecimal(0);
+
+						if (bd1.compareTo(bd2) == 1) {
+							dlgMKBtchProvide.setMedicine(medicine.getMedicineId().trim(), 
+									medicine.getMedicineName().trim(), medicine.getTotalQuantity());
+							dlgMKBtchProvide.setModal(true);
+							dlgMKBtchProvide.setVisible(true);
+							break;
+							
+						}
+						
+					}
+				}
+				btnBatchProvide.setEnabled(false);
+				logger.info("緊急取藥選擇的藥品編號: [{}]", selectedMedicineID);
+			tblMedicines.clearSelection();
+				refreshMedicineList();
+//				setVisible(false);
+			}
+		});
+		jpFunctionButton.add(btnBatchProvide);
 	}
 	
 	private void initTables() {
