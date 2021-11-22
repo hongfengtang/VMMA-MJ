@@ -14,6 +14,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.SwingConstants;
@@ -343,6 +345,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 									medicine.getMedicineName().trim(), medicine.getTotalQuantity());
 							dlgMKBtchProvide.setModal(true);
 							dlgMKBtchProvide.setVisible(true);
+							getMedicineList();
 							break;
 							
 						}
@@ -351,7 +354,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 				}
 				btnBatchProvide.setEnabled(false);
 				logger.info("緊急取藥選擇的藥品編號: [{}]", selectedMedicineID);
-			tblMedicines.clearSelection();
+				tblMedicines.clearSelection();
 				refreshMedicineList();
 //				setVisible(false);
 			}
@@ -563,6 +566,21 @@ public class JPMKDrugsStatus extends JCommonPanel {
 					lsVMMedicines.add(vmMedicine);
 				}
 			}
+			Collections.sort(lsVMMedicines, new Comparator<VMMedicine>() {
+
+				@Override
+				public int compare(VMMedicine o1, VMMedicine o2) {
+					
+					if(o1.isAlarm() && !o2.isAlarm()) {
+						return -1;
+					}
+					if (!o1.isAlarm() && o2.isAlarm()) {
+						return 0;
+					}
+					return Integer.valueOf(o1.getBoxId()) - Integer.valueOf(o2.getBoxId());
+				}
+				
+			});
 			lsSearchShow.addAll(lsVMMedicines);
 			
 			totalRows = lsSearchShow.size();

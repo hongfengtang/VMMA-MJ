@@ -129,6 +129,11 @@ implements ISignageCallBack{
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentShown(ComponentEvent e) {
+				textPlanSupply.setText("0");
+				lblRturnMessage.setOpaque(false);
+				lblRturnMessage.setBackground(new Color(181, 223, 226));
+				lblRturnMessage.setText("");
+
 				medicines = null;
 
 			}
@@ -332,7 +337,6 @@ implements ISignageCallBack{
 					medicines.getMedicinedata().get(medicineIndex).getMedicineName().trim()));
 		lblBoxId.setText("儲位編號: " + boxId);
 		lblBoxQuantityNow.setText("現存藥量: " + String.valueOf(stockQty));
-		lblPlanSupply.setText("領 藥 量: " + String.valueOf(planQty));
 		
 		BigDecimal bd1 = new BigDecimal(planQty);
 		BigDecimal bd2 = new BigDecimal(stockQty);
@@ -502,8 +506,7 @@ implements ISignageCallBack{
 		index = lblBoxId.getText().indexOf(":");
 		String boxId = lblBoxId.getText().substring(index + 1).trim();
 		
-		index = lblPlanSupply.getText().indexOf(":");
-		double planQty = Double.valueOf(lblPlanSupply.getText().substring(index + 1).trim());
+		double planQty = Double.valueOf(textPlanSupply.getText());
 		
 		int status = -1;
 		if(message.getCode() == CODES.PROV_VM_PROCESS) {
