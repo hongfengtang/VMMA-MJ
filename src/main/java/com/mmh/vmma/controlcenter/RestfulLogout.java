@@ -32,8 +32,8 @@ public class RestfulLogout implements IRestfulClient {
 		String url = globalData.getCcBaseUrl().endsWith("/") ? 
 				globalData.getCcBaseUrl() + uri.substring(1) : 
 				globalData.getCcBaseUrl() + uri;
-		request.setTerminalid(Optional.ofNullable(request.getTerminalid()).orElse(globalData.getTerminalId()));
-		request.setDatetime(Optional.ofNullable(request.getDatetime()).orElse(CommonUtils.getDateTime()));
+		request.setClientId(globalData.getTerminalId());
+		request.setDatetime(CommonUtils.getDateTime());
 		return (ResLogout)doPost(url, request, ResLogout.class);
 	}
 	@Override

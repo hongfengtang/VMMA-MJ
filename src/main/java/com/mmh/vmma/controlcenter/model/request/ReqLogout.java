@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 public class ReqLogout {
-	private String terminalid;
+	private String clientId;
 	private String datetime;
 	private String token;
 }

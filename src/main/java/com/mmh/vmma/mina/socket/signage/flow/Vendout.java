@@ -281,6 +281,11 @@ public class Vendout extends FlowFactory{
 			//取貨
 			runCompleted = false;
 			logger.info("STEP4. 開始取貨。");
+			
+			//2021-11-27 設置取貨動作與開始取貨動作之間增加1000ms延遲 - start
+			Thread.sleep(1000);
+			// - end
+			
 			setCurrentStep(3);
 			Action vmVendout = getActions().get(3);
 			vmVendout.setStatus(ACTION_STATUS.PROCESSING);

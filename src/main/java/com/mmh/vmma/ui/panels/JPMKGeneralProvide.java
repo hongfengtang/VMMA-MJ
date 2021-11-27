@@ -28,8 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.mmh.vmma.controlcenter.ResponseCode;
+import com.mmh.vmma.controlcenter.RestfulLogout;
 import com.mmh.vmma.controlcenter.RestfulProvideQuery;
 import com.mmh.vmma.controlcenter.RestfulTMMedicines;
+import com.mmh.vmma.controlcenter.model.request.ReqLogout;
 import com.mmh.vmma.controlcenter.model.request.ReqProvideQuery;
 import com.mmh.vmma.controlcenter.model.request.ReqTMedicines;
 import com.mmh.vmma.controlcenter.model.response.ResProvideQuery;
@@ -84,6 +86,9 @@ implements ISignageCallBack{
 	
 	@Autowired
 	private RestfulProvideQuery restProvideQuery;
+	
+	@Autowired
+	private RestfulLogout restLogout;
 
 	//自定義變量
 	private int totalRows = 0; 				//記錄共有多少條
@@ -214,6 +219,7 @@ implements ISignageCallBack{
 		btnBack.setBounds(291, 382, 143, 88);
 		btnBack.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				logout();
 				mainWindow.checkOptions(Settings.OPTIION_LOGIN, "登錄");
 			}
 		});
@@ -781,6 +787,21 @@ implements ISignageCallBack{
             ex.printStackTrace();
             logger.error("System Error", ex);
         }  
-    } 
+    }
+    
+    private void logout() {
+		try {
+			ReqLogout reqLogout = new ReqLogout();
+			reqLogout.setToken(mainWindow.getUserToken());
+			
+			restLogout.doPost(reqLogout);
+			
+			
+		}catch(Throwable e) {
+			logger.error("登出錯誤!", e);
+			return;
+		}
+
+    }
 	
 }

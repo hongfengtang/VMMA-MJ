@@ -68,7 +68,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 	
 	private final int topBottomHeight = 50;
 
-	private final String[] medicineHeader = {"藥物編號", "藥名", "現存總藥量", "儲位現存量", "是否達警告量", "儲位號"};
+	private final String[] medicineHeader = {"儲位號", "藥物編號", "藥名", "現存總藥量", "儲位現存量", "是否達警告量"};
 	private final int[] medicineHeaderSize = {50, 618, 50, 50, 0, 30};
 	
 	@Autowired
@@ -302,8 +302,8 @@ public class JPMKDrugsStatus extends JCommonPanel {
 			public void actionPerformed(ActionEvent e) {
 				int[] rows = tblMedicines.getSelectedRows();
 				for(int row : rows) {
-					String selectedMedicineID = ((String)tblMedicines.getValueAt(row, 0)).trim();
-					String selectedBoxId = ((String)tblMedicines.getValueAt(row, 5)).trim();
+					String selectedBoxId = ((String)tblMedicines.getValueAt(row, 0)).trim();
+					String selectedMedicineID = ((String)tblMedicines.getValueAt(row, 5)).trim();
 					for(VMMedicine medicine : lsVMMedicines){
 						if((medicine.getMedicineId().equalsIgnoreCase(selectedMedicineID)) &&
 								medicine.getBoxId().equalsIgnoreCase(selectedBoxId)){
@@ -331,8 +331,8 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		btnBatchProvide.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int row = tblMedicines.getSelectedRow();
-				String selectedMedicineID = ((String)tblMedicines.getValueAt(row, 0)).trim();
-				String selectedBoxId = ((String)tblMedicines.getValueAt(row, 5)).trim();
+				String selectedBoxId = ((String)tblMedicines.getValueAt(row, 0)).trim();
+				String selectedMedicineID = ((String)tblMedicines.getValueAt(row, 5)).trim();
 				for(VMMedicine medicine : lsVMMedicines){
 					if((medicine.getMedicineId().equalsIgnoreCase(selectedMedicineID)) &&
 							medicine.getBoxId().equalsIgnoreCase(selectedBoxId)){
@@ -612,8 +612,14 @@ public class JPMKDrugsStatus extends JCommonPanel {
 //"藥物編號", "藥名", "現存總藥量", "儲位現存量", "是否達警告量"
         if (rowsOfOnePage >= totalRows){		//一頁顯示
 			for(VMMedicine medicine : lsSearchShow){
-				mdMedicines.addRow(new Object[]{medicine.getMedicineId(), medicine.getMedicineName(), 
-						medicine.getTotalQuantity(), medicine.getBoxQuantity(), medicine.isAlarm(), medicine.getBoxId()});
+				mdMedicines.addRow(new Object[]{
+						medicine.getBoxId(), 
+						medicine.getMedicineName(), 
+						medicine.getTotalQuantity(), 
+						medicine.getBoxQuantity(), 
+						medicine.isAlarm(), 
+						medicine.getMedicineId()
+						});
 			}
 		
         }else{								//分頁顯示
@@ -631,8 +637,14 @@ public class JPMKDrugsStatus extends JCommonPanel {
         	}
 			for (int i = startRow; i < endRow; i++){
 				VMMedicine medicine = lsSearchShow.get(i);
-				mdMedicines.addRow(new Object[]{medicine.getMedicineId(), medicine.getMedicineName(), 
-						medicine.getTotalQuantity(), medicine.getBoxQuantity(), medicine.isAlarm(), medicine.getBoxId()});
+				mdMedicines.addRow(new Object[]{
+						medicine.getBoxId(),
+						medicine.getMedicineName(), 
+						medicine.getTotalQuantity(), 
+						medicine.getBoxQuantity(), 
+						medicine.isAlarm(), 
+						medicine.getMedicineId()
+						});
  			}
         }
         

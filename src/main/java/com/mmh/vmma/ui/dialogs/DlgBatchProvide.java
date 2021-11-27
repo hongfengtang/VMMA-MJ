@@ -442,6 +442,8 @@ implements ISignageCallBack{
 	
 	private void closeWindow(){
 		medicines = null;
+		btnOK.setEnabled(true);
+		btnCancel.setEnabled(true);
 		dispose();
 	}
 	
@@ -554,10 +556,11 @@ implements ISignageCallBack{
 		mapMedicinesResult.put(medicineId + "-" + boxId, mr);
 		
 		if(takedTimes >= planTakeTimes) {
-			btnOK.setEnabled(true);
+//			btnOK.setEnabled(true);
 			btnCancel.setEnabled(true);
 
 			updateProvidedResult();
+			closeWindow();
 		}
 	}
 	
