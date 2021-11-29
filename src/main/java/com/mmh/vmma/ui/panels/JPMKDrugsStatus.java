@@ -68,7 +68,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 	
 	private final int topBottomHeight = 50;
 
-	private final String[] medicineHeader = {"儲位號", "藥物編號", "藥名", "現存總藥量", "儲位現存量", "是否達警告量"};
+	private final String[] medicineHeader = {"儲位號", "藥名", "現存總藥量", "儲位現存量", "是否達警告量", "藥物編號"};
 	private final int[] medicineHeaderSize = {50, 618, 50, 50, 0, 30};
 	
 	@Autowired
@@ -342,7 +342,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 
 						if (bd1.compareTo(bd2) == 1) {
 							dlgMKBtchProvide.setMedicine(medicine.getMedicineId().trim(), 
-									medicine.getMedicineName().trim(), medicine.getTotalQuantity());
+									medicine.getMedicineName().trim(), medicine.getTotalQuantity(), medicine.getPhoto());
 							dlgMKBtchProvide.setModal(true);
 							dlgMKBtchProvide.setVisible(true);
 							getMedicineList();
@@ -575,7 +575,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 						return -1;
 					}
 					if (!o1.isAlarm() && o2.isAlarm()) {
-						return 0;
+						return 1;
 					}
 					return Integer.valueOf(o1.getBoxId()) - Integer.valueOf(o2.getBoxId());
 				}

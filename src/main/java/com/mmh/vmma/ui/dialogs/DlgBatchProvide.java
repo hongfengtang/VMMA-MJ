@@ -316,13 +316,18 @@ implements ISignageCallBack{
 		getContentPane().add(lblRturnMessage);
 	}
 	
-	public void setMedicine(String medicineId, String medicineName, double stockQty) {
+	public void setMedicine(String medicineId, String medicineName, double stockQty, String photo) {
 		this.medicineId = medicineId;
 		this.stockQty = stockQty;
 		lblMedicineID.setText("藥物編號: " + medicineId.trim());
 		lblMedicineName.setText("藥物名稱: " + medicineName.trim());
 		lblBoxId.setText("儲位編號: N/A");
 		lblBoxQuantityNow.setText("現存藥量: " + String.valueOf(stockQty));
+		if((photo != null) && (photo.length() > 0)){
+			lblMedicinePhoto.setIcon(CommonUtils.createAutoAdjustIcon((new ImageIcon(AESUtils.GenerateImage(photo))).getImage(), true));
+		}else {
+			lblMedicinePhoto.setIcon(CommonUtils.createAutoAdjustIcon((new ImageIcon("images/nopic.png")).getImage(), true));
+		}
 	}
 	
 	//根據輸入參數, 設置窗口顯示內容
@@ -354,7 +359,7 @@ implements ISignageCallBack{
 		lblRturnMessage.setText("");
 		
 		//base64圖片
-		medicinePic = medicines.getMedicinedata().get(0).getPhoto();
+		medicinePic = medicines.getMedicinedata().get(medicineIndex).getPhoto();
 		if((medicinePic != null) && (medicinePic.length() > 0)){
 			lblMedicinePhoto.setIcon(CommonUtils.createAutoAdjustIcon((new ImageIcon(AESUtils.GenerateImage(medicinePic))).getImage(), true));
 		}else {

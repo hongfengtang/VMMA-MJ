@@ -689,13 +689,13 @@ implements ISignageCallBack{
 			
 			for(ResTMedicines.DataField medicine : lsMedicines){
 				if(medicine.isAlarm()){
-					lsIsAlarmShow.add(medicine);;
+					lsIsAlarmShow.add(medicine);
 				}
 			}
 
 			totalRows = lsIsAlarmShow.size();
 			
-			rowsOfOnePage = Math.round(jspAlarmDrugsList.getHeight() / ROW_HEIGHT) - 1;
+			rowsOfOnePage = Math.round(jspAlarmDrugsList.getHeight() / ROW_HEIGHT) - 2;
 			pages = (int)(Math.ceil((double)totalRows/rowsOfOnePage));
 			txtPageNo.setText("1");
 			lblRecordsPages.setText("/"+String.valueOf(pages)+"頁");
