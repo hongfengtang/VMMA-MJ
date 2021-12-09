@@ -67,8 +67,9 @@ implements ISignageCallBack{
 	
 	private static final int ROW_HEIGHT = 30;
 	
-	private final String[] alarmDrugsHeader = {"藥物編號", "藥物名稱", "警示量", "現存總量", "isAlarm"};
-	private final int[] alarmDrugsHeaderSize = {50, 618, 50, 50, 0};
+	private final String[] alarmDrugsHeader = {"藥物編號", "藥物名稱", "警示量", "現存總量", "isAlarm", "最大存儲量"};
+	private final int[] alarmDrugsHeaderSize = {50, 618, 50, 50, 0, 0};
+	private final int CHECK_COLUMN = 4;
 
 	private List<ResTMedicines.DataField> lsIsAlarmShow = new ArrayList<ResTMedicines.DataField>();
 	
@@ -721,7 +722,7 @@ implements ISignageCallBack{
         if (rowsOfOnePage >= totalRows){		//一頁顯示
 			for(ResTMedicines.DataField medicine : lsIsAlarmShow){
 				mdMedicines.addRow(new Object[]{medicine.getMedicineId(), medicine.getMedicineName(), 
-						String.valueOf(medicine.getAlarmQty()), String.valueOf(medicine.getQuantity()), medicine.isAlarm()});
+						String.valueOf(medicine.getAlarmQty()), String.valueOf(medicine.getQuantity()), medicine.isAlarm(), medicine.getMaxQuantity()});
 			}
 		
         }else{								//分頁顯示
@@ -740,7 +741,7 @@ implements ISignageCallBack{
 			for (int i = startRow; i < endRow; i++){
 				ResTMedicines.DataField medicine = lsIsAlarmShow.get(i);
 				mdMedicines.addRow(new Object[]{medicine.getMedicineId(), medicine.getMedicineName(), 
-						String.valueOf(medicine.getAlarmQty()), String.valueOf(medicine.getQuantity()), medicine.isAlarm()});
+						String.valueOf(medicine.getAlarmQty()), String.valueOf(medicine.getQuantity()), medicine.isAlarm(), medicine.getMaxQuantity()});
  			}
         }
         
@@ -765,7 +766,7 @@ implements ISignageCallBack{
 				public java.awt.Component getTableCellRendererComponent(JTable table,  Object value, 
 						boolean isSelected, boolean hasFocus, int row, int column) {
 
-					Boolean isAlarm = (Boolean)table.getModel().getValueAt(row, 4);
+					Boolean isAlarm = (Boolean)table.getModel().getValueAt(row, CHECK_COLUMN);
 					
 					if(isAlarm){
                         setBackground(colorBG);  

@@ -56,6 +56,9 @@ public class ResProvideQuery extends ResEntity {
 		private String patientName;
 		private String medNo;
 		private String scrn;
+		private String lot;
+		private String expiredDate;
+		private String confirmType;
 		private List<BoxInfo> boxInfo;
 		public List<BoxInfo> getBoxInfo(){
 			if(boxInfo == null) {

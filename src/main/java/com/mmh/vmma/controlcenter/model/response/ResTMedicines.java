@@ -50,7 +50,7 @@ public class ResTMedicines extends ResEntity {
 		private String ncku9;
 		private String Photo;
 		private String barcode;
-		private String pno;
+		private String lot;
 		private String control;
 		private List<BoxInfoField> boxInfo;
 		

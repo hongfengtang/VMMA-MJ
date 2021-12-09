@@ -68,8 +68,9 @@ public class JPMKDrugsStatus extends JCommonPanel {
 	
 	private final int topBottomHeight = 50;
 
-	private final String[] medicineHeader = {"儲位號", "藥名", "現存總藥量", "儲位現存量", "是否達警告量", "藥物編號"};
-	private final int[] medicineHeaderSize = {50, 618, 50, 50, 0, 30};
+	private final String[] medicineHeader = {"儲位號", "藥名", "現存總藥量", "儲位現存量","最大儲位數",  "是否達警告量", "藥物編號"};
+	private final int[] medicineHeaderSize = {50, 618, 50, 50, 50, 0, 30};
+	private final int CHECK_COLUMN = 5;
 	
 	@Autowired
 	GlobalData globalData;
@@ -558,7 +559,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 					vmMedicine.setNcku9(medicine.getNcku9());
 					vmMedicine.setPhoto(medicine.getPhoto());
 					vmMedicine.setBarcode(medicine.getBarcode());
-					vmMedicine.setPno(medicine.getPno());
+					vmMedicine.setPno(medicine.getLot());
 					vmMedicine.setControl(medicine.getControl());
 					vmMedicine.setBoxId(box.getBoxId());
 					vmMedicine.setBoxQuantity(box.getQuantity());
@@ -617,6 +618,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 						medicine.getMedicineName(), 
 						medicine.getTotalQuantity(), 
 						medicine.getBoxQuantity(), 
+						medicine.getBoxMaxQuantity(),
 						medicine.isAlarm(), 
 						medicine.getMedicineId()
 						});
@@ -642,6 +644,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 						medicine.getMedicineName(), 
 						medicine.getTotalQuantity(), 
 						medicine.getBoxQuantity(), 
+						medicine.getBoxMaxQuantity(),
 						medicine.isAlarm(), 
 						medicine.getMedicineId()
 						});
@@ -782,7 +785,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 				public java.awt.Component getTableCellRendererComponent(JTable table,  Object value, 
 						boolean isSelected, boolean hasFocus, int row, int column) {
 
-					Boolean isAlarm = (Boolean)table.getModel().getValueAt(row, 4);
+					Boolean isAlarm = (Boolean)table.getModel().getValueAt(row, CHECK_COLUMN);
 					
 					if(isAlarm){
                         setBackground(colorBG);  

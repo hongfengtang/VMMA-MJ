@@ -46,6 +46,7 @@ import javax.swing.UIManager;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,6 +110,8 @@ implements ISignageCallBack{
 	private JCommonLabel lblBoxId;
 	private JCommonLabel lblBoxQuantityNow;
 	private JCommonLabel lblPlanSupply;
+	private JCommonLabel lblLot;
+	private JCommonLabel lblExpiredDate;
 
 	//返回消息
 	private JCommonLabel lblRturnMessage;
@@ -176,13 +179,13 @@ implements ISignageCallBack{
 //		setUndecorated(true);
 		setType(Type.UTILITY);
 		
-		setBounds(100, 100, 800, 750);
+		setBounds(100, 100, 800, 800);
 		setLocationRelativeTo(null);
 		
 		getContentPane().setLayout(null);
 		getContentPane().setBackground(new Color(181, 223, 226));
 		jpMedicine = new JCommonPanel();
-		jpMedicine.setBounds(0, 0, 748, 521);
+		jpMedicine.setBounds(0, 0, 748, 570);
 		jpMedicine.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(jpMedicine);
 		jpMedicine.setLayout(null);
@@ -209,7 +212,7 @@ implements ISignageCallBack{
 		jpMedicineInfo = new JCommonPanel();
 		jpMedicineInfo.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "藥品訊息", 
 				TitledBorder.LEADING, TitledBorder.TOP, new Font("楷体", Font.PLAIN, 22), new Color(220, 20, 60)));
-		jpMedicineInfo.setBounds(232, 55, 492, 245);
+		jpMedicineInfo.setBounds(232, 55, 492, 294);
 		jpMedicine.add(jpMedicineInfo);
 		jpMedicineInfo.setLayout(null);
 
@@ -261,11 +264,23 @@ implements ISignageCallBack{
 		lblPlanSupply.setBounds(250, 200, 230, 25);
 		jpMedicineInfo.add(lblPlanSupply);
 		
+		lblLot = new JCommonLabel("批    號:" );
+		lblLot.setBounds(10, 230, 230, 25);
+		lblLot.setFont(new Font("楷体", Font.PLAIN, 20));
+		lblLot.setForeground(new Color(220, 20, 60));
+		jpMedicineInfo.add(lblLot);
+
+		lblExpiredDate = new JCommonLabel("效    期:" );
+		lblExpiredDate.setBounds(10, 259, 458, 25);
+		lblExpiredDate.setFont(new Font("楷体", Font.PLAIN, 20));
+		lblExpiredDate.setForeground(new Color(220, 20, 60));
+		jpMedicineInfo.add(lblExpiredDate);
+
 		jpPatientInfo = new JCommonPanel();
 		jpPatientInfo.setLayout(null);
 		jpPatientInfo.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "病患訊息", 
 				TitledBorder.LEADING, TitledBorder.TOP, new Font("楷体", Font.PLAIN, 22), new Color(0, 0, 140)));
-		jpPatientInfo.setBounds(232, 310, 492, 206);
+		jpPatientInfo.setBounds(232, 359, 492, 206);
 		jpMedicine.add(jpPatientInfo);
 		
 		lblChartNo = new JCommonLabel("病 歷 號:");
@@ -301,7 +316,7 @@ implements ISignageCallBack{
 		okButton = new JRoundButton("確定");
 		okButton.setIcon(new ImageIcon("images/check.png"));
 		okButton.setForeground(new Color(245, 255, 250));
-		okButton.setBounds(547, 595, 172, 70);
+		okButton.setBounds(548, 646, 172, 70);
 		getContentPane().add(okButton);
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -310,7 +325,7 @@ implements ISignageCallBack{
 		});
 		
 		lblRturnMessage = new JCommonLabel("");
-		lblRturnMessage.setBounds(21, 529, 699, 56);
+		lblRturnMessage.setBounds(22, 580, 699, 56);
 		lblRturnMessage.setOpaque(false);
 		lblRturnMessage.setForeground(new Color(255, 0, 0));
 		lblRturnMessage.setBackground(Color.YELLOW);
@@ -328,7 +343,9 @@ implements ISignageCallBack{
 			lblMedicineUnit.setText("藥物單位:N/A");
 			lblBoxId.setText("儲位編號: N/A");
 			lblBoxQuantityNow.setText("現存藥量: N/A" );
-			lblPlanSupply.setText("領 藥 量：N/A");
+			lblPlanSupply.setText("領 藥 量: N/A");
+			lblLot.setText("批    號: N/A" );
+			lblExpiredDate.setText("效    期: N/A" );
 			
 			lblChartNo.setText("病 歷 號: N/A");
 			lblPatientName.setText("病患姓名: N/A");
@@ -342,12 +359,17 @@ implements ISignageCallBack{
 			
 		}else{
 
-			setPageItems(0, 0);
+			try {
+				setPageItems(0, 0);
+			} catch (ParseException e) {
+				logger.error("", e);
+				e.printStackTrace();
+			}
 		}
 	}
 	
 	//根據輸入參數, 設置窗口顯示內容
-	private void setPageItems(int medicineIndex, int boxIndex) {
+	private void setPageItems(int medicineIndex, int boxIndex) throws ParseException {
 		String boxId = medicines.getMedicinedata().get(medicineIndex).getBoxInfo().get(boxIndex).getBoxId().trim();
 		double stockQty = medicines.getMedicinedata().get(medicineIndex).getBoxInfo().get(boxIndex).getStockQty();
 		double planQty = medicines.getMedicinedata().get(medicineIndex).getBoxInfo().get(boxIndex).getTakeQty();
@@ -366,16 +388,27 @@ implements ISignageCallBack{
 		lblBoxId.setText("儲位編號: " + boxId);
 		lblBoxQuantityNow.setText("現存藥量: " + String.valueOf(stockQty));
 		lblPlanSupply.setText("領 藥 量: " + String.valueOf(planQty));
+		lblLot.setText("批    號: " +  
+				(medicines.getMedicinedata().get(medicineIndex).getLot() == null ? "" : 
+					medicines.getMedicinedata().get(medicineIndex).getLot().trim()));
+		lblExpiredDate.setText("效    期: " +
+				(medicines.getMedicinedata().get(medicineIndex).getExpiredDate() == null ? "" : 
+					CommonUtils.LTZDTFormat(medicines.getMedicinedata().get(medicineIndex).getExpiredDate().trim())));
+
 		
 		lblChartNo.setText("病 歷 號: " + (medicines.getChartNo() == null ? "" : medicines.getChartNo().trim()));
 		lblPatientName.setText("病患姓名: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getPatientName() == null ? "" : medicines.getMedicinedata().get(medicineIndex).getPatientName().trim()));
+				(medicines.getMedicinedata().get(medicineIndex).getPatientName() == null ? "" : 
+					medicines.getMedicinedata().get(medicineIndex).getPatientName().trim()));
 		lblMedNo.setText("領 藥 號: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getMedNo() == null ? "" : medicines.getMedicinedata().get(medicineIndex).getMedNo().trim()));
+				(medicines.getMedicinedata().get(medicineIndex).getMedNo() == null ? "" : 
+					medicines.getMedicinedata().get(medicineIndex).getMedNo().trim()));
 		lblScrn.setText("處方日期: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getScrn() == null ? "" : medicines.getMedicinedata().get(medicineIndex).getScrn().trim()));
+				(medicines.getMedicinedata().get(medicineIndex).getScrn() == null ? "" : 
+					CommonUtils.LTZDTFormat(medicines.getMedicinedata().get(medicineIndex).getScrn().trim())));
 		lblFq.setText("頻    次: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getFq() == null ? "" : medicines.getMedicinedata().get(medicineIndex).getFq().trim()));
+				(medicines.getMedicinedata().get(medicineIndex).getFq() == null ? "" : 
+					medicines.getMedicinedata().get(medicineIndex).getFq().trim()));
 
 		BigDecimal bd1 = new BigDecimal(planQty);
 		BigDecimal bd2 = new BigDecimal(stockQty);
@@ -501,7 +534,11 @@ implements ISignageCallBack{
 			if (message.getMessage() != null) {
 				String key = message.getMessage().trim();
 				MedicineResult mrStart = mapMedicinesResult.get(key);
-				setPageItems(mrStart.getMedicineIndex(), mrStart.getBoxIndex());
+				try {
+					setPageItems(mrStart.getMedicineIndex(), mrStart.getBoxIndex());
+				} catch (ParseException e) {
+					logger.error("", e);
+				}
 			}
 			return;
 		}

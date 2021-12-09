@@ -9,9 +9,16 @@ import java.awt.Image;
 import java.awt.Point;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
@@ -194,4 +201,49 @@ public class CommonUtils {
     	}
     	
     }
+    
+    public static String LTZDTFormat(String datetime) {
+    	try {
+	        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+	
+	        		// date/time
+	
+	        		.append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+	//        		.append(DateTimeFormatter.BASIC_ISO_DATE)
+	//        		.append(DateTimeFormatter.ISO_DATE)
+	//        		.append(DateTimeFormatter.ISO_DATE_TIME)
+	//        		.append(DateTimeFormatter.ISO_LOCAL_DATE)
+	//        		.append(DateTimeFormatter.ISO_LOCAL_TIME)
+	//        		.append(DateTimeFormatter.ISO_OFFSET_DATE)
+	//        		.append(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+	//        		.append(DateTimeFormatter.ISO_OFFSET_TIME)
+	
+	        		// offset (hh:mm - "+00:00" when it's zero)
+	
+	        		.optionalStart().appendOffset("+HH:MM", "+00:00").optionalEnd()
+	
+	        		// offset (hhmm - "+0000" when it's zero)
+	
+	        		.optionalStart().appendOffset("+HHMM", "+0000").optionalEnd()
+	
+	        		// offset (hh - "Z" when it's zero)
+	
+	        		.optionalStart().appendOffset("+HH", "Z").optionalEnd()
+	
+	        		// create formatter
+	
+	        		.toFormatter();
+	
+	        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+	        String dt = OffsetDateTime.parse(datetime, formatter).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")).toString();
+			Date result = df.parse(dt);
+			DateFormat df1 =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			df1.setTimeZone(TimeZone.getTimeZone(Calendar.getInstance().getTimeZone().getID()));
+			return df1.format(result);
+    	}catch(Exception e) {
+    		return datetime;
+    	}
+
+    }
+    
 }
