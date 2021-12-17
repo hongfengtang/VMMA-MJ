@@ -675,7 +675,7 @@ public class JPKeyboard extends JCommonPanel {
 			}
 		});
 		add(vkSlash);
-		vkShift = new JKeyButton("Shit");
+		vkShift = new JKeyButton("Shift");
 		vkShift.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				isShiftOn = !isShiftOn;

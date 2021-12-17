@@ -68,9 +68,10 @@ public class JPMKDrugsStatus extends JCommonPanel {
 	
 	private final int topBottomHeight = 50;
 
-	private final String[] medicineHeader = {"儲位號", "藥名", "現存總藥量", "儲位現存量","最大儲位數",  "是否達警告量", "藥物編號"};
+	private final String[] medicineHeader = {"儲位號", "藥名", "現存總藥量", "儲位現存量","最大量",  "是否達警告量", "藥物編號"};
 	private final int[] medicineHeaderSize = {50, 618, 50, 50, 50, 0, 30};
 	private final int CHECK_COLUMN = 5;
+	private final int MEDICINEID_COLUMN = 6;
 	
 	@Autowired
 	GlobalData globalData;
@@ -304,7 +305,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 				int[] rows = tblMedicines.getSelectedRows();
 				for(int row : rows) {
 					String selectedBoxId = ((String)tblMedicines.getValueAt(row, 0)).trim();
-					String selectedMedicineID = ((String)tblMedicines.getValueAt(row, 5)).trim();
+					String selectedMedicineID = ((String)tblMedicines.getValueAt(row, MEDICINEID_COLUMN)).trim();
 					for(VMMedicine medicine : lsVMMedicines){
 						if((medicine.getMedicineId().equalsIgnoreCase(selectedMedicineID)) &&
 								medicine.getBoxId().equalsIgnoreCase(selectedBoxId)){
@@ -333,7 +334,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 			public void actionPerformed(ActionEvent e) {
 				int row = tblMedicines.getSelectedRow();
 				String selectedBoxId = ((String)tblMedicines.getValueAt(row, 0)).trim();
-				String selectedMedicineID = ((String)tblMedicines.getValueAt(row, 5)).trim();
+				String selectedMedicineID = ((String)tblMedicines.getValueAt(row, MEDICINEID_COLUMN)).trim();
 				for(VMMedicine medicine : lsVMMedicines){
 					if((medicine.getMedicineId().equalsIgnoreCase(selectedMedicineID)) &&
 							medicine.getBoxId().equalsIgnoreCase(selectedBoxId)){

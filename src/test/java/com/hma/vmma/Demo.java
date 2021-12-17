@@ -11,10 +11,12 @@ import javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.GridLayout;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.mmh.vmma.utils.CommonUtils;
 
@@ -27,7 +29,11 @@ import java.net.MalformedURLException;
  * @date  2019-08-20 */
 public class Demo{
 
+	private static Logger logger = LogManager.getLogger(Demo.class);
     public static void main(String args[]) throws Exception{
+    	
+    	String msg = "${java:hw}";
+    	logger.info("{}", msg);
     	
     	System.out.println(CommonUtils.getMacAdd());
     	String s = "藥物編號: 12345678:aaa ";
