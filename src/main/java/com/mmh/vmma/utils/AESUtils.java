@@ -184,7 +184,7 @@ public class AESUtils {
         return value;
     }
     
-    @SuppressWarnings("restriction")
+//    @SuppressWarnings("restriction")
 	public static String GetImageStr(String imgFilePath) {// 将图片文件转化为字节数组字符串，并对其进行Base64编码处理
         byte[] data = null;
 
@@ -199,19 +199,21 @@ public class AESUtils {
         }
 
         // 对字节数组Base64编码
-        sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
-        return encoder.encode(data);// 返回Base64编码过的字节数组字符串
+//        sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
+//        return encoder.encode(data);// 返回Base64编码过的字节数组字符串
+        return java.util.Base64.getEncoder().encodeToString(data);
     }
 
     public static boolean GenerateImage(String imgStr, String imgFilePath) {// 对字节数组字符串进行Base64解码并生成图片
         if (imgStr == null) // 图像数据为空
             return false;
-        @SuppressWarnings("restriction")
-		sun.misc.BASE64Decoder decoder = new sun.misc.BASE64Decoder();
+//        @SuppressWarnings("restriction")
+//		sun.misc.BASE64Decoder decoder = new sun.misc.BASE64Decoder();
         try {
             // Base64解码
-            @SuppressWarnings("restriction")
-			byte[] bytes = decoder.decodeBuffer(imgStr);
+//            @SuppressWarnings("restriction")
+//			byte[] bytes = decoder.decodeBuffer(imgStr);
+            byte[] bytes = java.util.Base64.getDecoder().decode(imgStr);
             for (int i = 0; i < bytes.length; ++i) {
                 if (bytes[i] < 0) {// 调整异常数据
                     bytes[i] += 256;
@@ -231,12 +233,13 @@ public class AESUtils {
     public static byte[] GenerateImage(String imgStr) {// 对字节数组字符串进行Base64解码并生成图片
         if (imgStr == null) // 图像数据为空
             return null;
-        @SuppressWarnings("restriction")
-		sun.misc.BASE64Decoder decoder = new sun.misc.BASE64Decoder();
+//        @SuppressWarnings("restriction")
+//		sun.misc.BASE64Decoder decoder = new sun.misc.BASE64Decoder();
         try {
             // Base64解码
-            @SuppressWarnings("restriction")
-			byte[] bytes = decoder.decodeBuffer(imgStr);
+//            @SuppressWarnings("restriction")
+//			byte[] bytes = decoder.decodeBuffer(imgStr);
+            byte[] bytes = java.util.Base64.getDecoder().decode(imgStr);
             for (int i = 0; i < bytes.length; ++i) {
                 if (bytes[i] < 0) {// 调整异常数据
                     bytes[i] += 256;

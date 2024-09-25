@@ -27,8 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.mmh.vmma.controlcenter.ResponseCode;
+import com.mmh.vmma.controlcenter.RestfulLogout;
 import com.mmh.vmma.controlcenter.RestfulTMMedicines;
 import com.mmh.vmma.controlcenter.model.VMMedicine;
+import com.mmh.vmma.controlcenter.model.request.ReqLogout;
 import com.mmh.vmma.controlcenter.model.request.ReqTMedicines;
 import com.mmh.vmma.controlcenter.model.response.ResTMedicines;
 import com.mmh.vmma.ui.common.GlobalData;
@@ -84,12 +86,18 @@ public class JPMKDrugsStatus extends JCommonPanel {
 	
 	@Autowired
 	private DlgBatchProvide dlgMKBtchProvide;
-	
+
+	@Autowired
+	private RestfulLogout restLogout;
+
 	//自定義變量
 	private int totalRows = 0; 				//記錄共有多少條
 	private int rowsOfOnePage = 0; 			//每頁可顯示記錄數
 	private int pages = 0; 					//共有頁數
 	private String nowPageNo = "1";
+	
+	private int timeDown = 120;
+	private boolean timeDownRunning = false, timeDownStop = false;
 	
 	private List<ResTMedicines.DataField> lsMedicines;
 	private List<VMMedicine> lsVMMedicines = new ArrayList<VMMedicine>();
@@ -139,11 +147,19 @@ public class JPMKDrugsStatus extends JCommonPanel {
 			@Override
 			public void componentShown(ComponentEvent e) {
 				getMedicineList();
+				timeDownRunning = true;
+				timeDownStop = false;
+				resetTimeDown();
+				timedownLogout();
 			}
 
 			@Override
 			public void componentHidden(ComponentEvent e) {
+//				timeDown = 0;
+				timeDownRunning = false;
+				timeDownStop = true;
 				initTables();
+				
 			}
 			
 		});
@@ -157,7 +173,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		jpTitle.setLayout(new BorderLayout(0, 0));
 		add(jpTitle, BorderLayout.NORTH);
 		
-		lblShowMessage = new JCommonLabel("馬偕醫院 - 即時藥存量列表");
+		lblShowMessage = new JCommonLabel("高雄榮總 - 即時藥存量列表");
 		lblShowMessage.setHorizontalAlignment(SwingConstants.CENTER);
 		lblShowMessage.setFont(new Font("楷体", Font.BOLD, 40));
 		jpTitle.add(lblShowMessage);
@@ -169,7 +185,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 			public void componentShown(ComponentEvent e) {
 				if(tblMedicines.getSelectedRow() >= 0){
 					btnShowDetail.setEnabled(true);
-					btnBatchProvide.setEnabled(true);
+					btnBatchProvide.setEnabled(false);		//for 高雄榮總
 				}else{
 					btnShowDetail.setEnabled(false);
 					btnBatchProvide.setEnabled(false);
@@ -193,6 +209,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		cbField.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				txtValue.setText("");
+				resetTimeDown();
 			}
 		});
 		cbField.setModel(new DefaultComboBoxModel<String>((new String[]{"藥物編碼",
@@ -204,6 +221,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		cbCondition = new JComboBox<String>();
 		cbCondition.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				resetTimeDown();
 				txtValue.setText("");
 				if(e.getStateChange() == ItemEvent.SELECTED){
 					if(cbCondition.getSelectedIndex() == 3){
@@ -228,6 +246,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		btnSearch = new JPlaintButton("搜索");
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				SearchMedicines();
 			}
 		});
@@ -251,9 +270,10 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		tblMedicines.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
+				resetTimeDown();
 				if(tblMedicines.getSelectedRow() >= 0){
 					btnShowDetail.setEnabled(true);
-					btnBatchProvide.setEnabled(true);
+					btnBatchProvide.setEnabled(false);	//for 高雄榮總
 				}else{
 					btnShowDetail.setEnabled(false);
 					btnBatchProvide.setEnabled(false);
@@ -290,6 +310,8 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		btnBack.setBounds(0, 0, 95, 53);
 		btnBack.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				timeDownStop = true;
+				resetTimeDown();
 				mainWindow.checkOptions(Settings.OPTION_MKGENERAL_DRUG, "調劑");
 			}
 		});
@@ -302,6 +324,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		btnShowDetail.setEnabled(false);
 		btnShowDetail.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				int[] rows = tblMedicines.getSelectedRows();
 				for(int row : rows) {
 					String selectedBoxId = ((String)tblMedicines.getValueAt(row, 0)).trim();
@@ -330,8 +353,10 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		btnBatchProvide.setIcon(new ImageIcon("images/medicines.png"));
 		btnBatchProvide.setBounds(401, 7, 80, 50);
 		btnBatchProvide.setEnabled(false);
+		btnBatchProvide.setVisible(false);		//for 高雄榮總
 		btnBatchProvide.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				timeDownRunning = false;
 				int row = tblMedicines.getSelectedRow();
 				String selectedBoxId = ((String)tblMedicines.getValueAt(row, 0)).trim();
 				String selectedMedicineID = ((String)tblMedicines.getValueAt(row, MEDICINEID_COLUMN)).trim();
@@ -348,8 +373,11 @@ public class JPMKDrugsStatus extends JCommonPanel {
 							dlgMKBtchProvide.setModal(true);
 							dlgMKBtchProvide.setVisible(true);
 							getMedicineList();
-							break;
-							
+							if (dlgMKBtchProvide.getTimeoutLogout()) {
+								logout();
+								mainWindow.checkOptions(Settings.OPTION_LOGIN, "登錄");								
+							}
+							break;						
 						}
 						
 					}
@@ -359,6 +387,8 @@ public class JPMKDrugsStatus extends JCommonPanel {
 				tblMedicines.clearSelection();
 				refreshMedicineList();
 //				setVisible(false);
+				timeDownRunning = true;
+				resetTimeDown();
 			}
 		});
 		jpFunctionButton.add(btnBatchProvide);
@@ -809,5 +839,47 @@ public class JPMKDrugsStatus extends JCommonPanel {
             logger.error("System Error", ex);
         }  
     }
+    
+    private void logout() {
+		try {
+			ReqLogout reqLogout = new ReqLogout();
+			reqLogout.setToken(mainWindow.getUserToken());
+			
+			restLogout.doPost(reqLogout);
+			
+			
+		}catch(Throwable e) {
+			logger.error("登出錯誤!", e);
+			return;
+		}
+
+    }
+    
+    private void resetTimeDown() {
+    	timeDown = 120;
+    }
+
+	private void timedownLogout() {
+		timeDown = 120;
+		new Thread(new Runnable() {
+			public void run() {
+				while ((timeDown > 0) && (!timeDownStop)){
+					try{
+						Thread.sleep(1000);
+					}catch(Exception e){
+						
+					}
+					if (timeDownRunning) {
+						--timeDown;
+					}
+					logger.info("Drugs Status timeDown = {}", timeDown);
+				}
+				if (timeDown <= 0){
+					logout();
+					mainWindow.checkOptions(Settings.OPTION_LOGIN, "登錄");
+				}
+			 }
+		}).start();
+	}
     
 }

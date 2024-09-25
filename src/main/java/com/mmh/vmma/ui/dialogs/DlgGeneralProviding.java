@@ -78,6 +78,9 @@ implements ISignageCallBack{
 	private int planTakeTimes = 0;
 	private int takedTimes = 0;
 	
+	private boolean timeoutLogout = false, manualLogout = false;
+	
+	
 	private String medicinePic = "";
 	private HashMap<String, Integer> mapMedicinesProviding = new HashMap<String, Integer>();
 	private HashMap<String, MedicineResult> mapMedicinesResult = new HashMap<String, MedicineResult>();
@@ -132,6 +135,7 @@ implements ISignageCallBack{
 					lblRturnMessage.setBackground(Color.YELLOW);
 					lblRturnMessage.setText("缺少病患或取藥訊息！！");
 					okButton.setEnabled(true);
+					timeoutLogout();
 					return;
 				}
 				//開始取藥
@@ -190,7 +194,7 @@ implements ISignageCallBack{
 		getContentPane().add(jpMedicine);
 		jpMedicine.setLayout(null);
 		
-		lblOpenMsg = new JCommonLabel("調劑操作確認");
+		lblOpenMsg = new JCommonLabel("取藥操作確認");
 		lblOpenMsg.setHorizontalAlignment(SwingConstants.CENTER);
 		lblOpenMsg.setForeground(new Color(0, 0, 128));
 		lblOpenMsg.setFont(new Font("楷体", Font.BOLD, 25));
@@ -240,7 +244,7 @@ implements ISignageCallBack{
 		lblBarcodeNo2.setBounds(10, 135, 472, 25);
 		jpMedicineInfo.add(lblBarcodeNo2);
 		
-		lblMedicineUnit = new JCommonLabel("藥物單位:");
+		lblMedicineUnit = new JCommonLabel("醫囑單上藥量:");
 		lblMedicineUnit.setForeground(new Color(220, 20, 60));
 		lblMedicineUnit.setFont(new Font("楷体", Font.PLAIN, 20));
 		lblMedicineUnit.setBounds(10, 170, 230, 25);
@@ -320,6 +324,7 @@ implements ISignageCallBack{
 		getContentPane().add(okButton);
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				manualLogout = true;
 				closeWindow();
 			}
 		});
@@ -340,7 +345,7 @@ implements ISignageCallBack{
 			lblMedicineName.setText("藥物名稱: N/A");
 			lblBarcodeNo1.setText("條 碼 1 : N/A");
 			lblBarcodeNo2.setText("條 碼 2 :N/A");
-			lblMedicineUnit.setText("藥物單位:N/A");
+			lblMedicineUnit.setText("醫囑單上藥量:N/A");
 			lblBoxId.setText("儲位編號: N/A");
 			lblBoxQuantityNow.setText("現存藥量: N/A" );
 			lblPlanSupply.setText("領 藥 量: N/A");
@@ -382,9 +387,7 @@ implements ISignageCallBack{
 				(medicines.getBarcodeNo1() == null ? "" : medicines.getBarcodeNo1().trim()));
 		lblBarcodeNo2.setText("條 碼 2 : " + 
 				(medicines.getBarcodeNo2() == null ? "" : medicines.getBarcodeNo2().trim()));
-		lblMedicineUnit.setText("藥物單位: " + 
-				(medicines.getMedicinedata().get(medicineIndex).getDoseUnit() == null ? "" : 
-					medicines.getMedicinedata().get(medicineIndex).getDoseUnit().trim()));;
+		lblMedicineUnit.setText("醫囑單上藥量: " + String.valueOf(medicines.getMedicinedata().get(medicineIndex).getTakeQty()));
 		lblBoxId.setText("儲位編號: " + boxId);
 		lblBoxQuantityNow.setText("現存藥量: " + String.valueOf(stockQty));
 		lblPlanSupply.setText("領 藥 量: " + String.valueOf(planQty));
@@ -419,6 +422,7 @@ implements ISignageCallBack{
 			lblRturnMessage.setText("計劃領藥數據量大於藥盒現有數量，無法繼續領藥!");
 			logger.error("計劃領藥失敗 - 計劃領藥數據量大於藥盒現有數量，無法繼續領藥!");
 			okButton.setEnabled(true);
+			timeoutLogout();
 			return;
 		}
 		lblRturnMessage.setOpaque(false);
@@ -600,6 +604,7 @@ implements ISignageCallBack{
 		if(takedTimes >= planTakeTimes) {
 			okButton.setEnabled(true);
 			updateProvidedResult();
+			timeoutLogout();
 		}
 	}
 	
@@ -609,6 +614,33 @@ implements ISignageCallBack{
 	
 	public double getProvidedQty(){
 		return planQty;
+	}
+	
+	public boolean getTimeoutLogout() {
+		return timeoutLogout;
+	}
+	
+	private void timeoutLogout() {
+		timeoutLogout = false; 
+		manualLogout = false;
+		new Thread(new Runnable() {
+			public void run() {
+				int duration = 0;
+				while ((duration <= 90) && (!manualLogout)){
+					try{
+						Thread.sleep(1000);
+					}catch(Exception e){
+						
+					}
+					duration += 1;
+					logger.info("duration = {}", duration);
+				}
+				if (duration >= 90) {
+					timeoutLogout = true;
+					closeWindow();
+				}
+			 }
+		}).start();
 	}
 	
 	@Data

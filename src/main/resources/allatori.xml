@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <input>
-        <jar in="MMH-VMMA-1.0.jar" out="obf-MMH-VMMA-1.0.jar"/>
+        <jar in="MMH-VMMA-2.0.jar" out="obf-MMH-VMMA-2.0.jar"/>
     </input>
     <watermark key="secure-key-to-extract-watermark" value="developer: HF"/>
     <keep-names>
@@ -38,6 +38,6 @@
 -->
     </ignore-classes>
     <classpath>
-    	<jar name="C:/Users/hongftan/.m2/repository/**/*.jar"/>
+    	<jar name="C:/Users/tangh/.m2/repository/**/*.jar"/>
     </classpath>
 </config>

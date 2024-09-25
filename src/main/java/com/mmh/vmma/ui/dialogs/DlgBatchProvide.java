@@ -34,6 +34,7 @@ import com.mmh.vmma.mina.socket.signage.queue.RequestQueue;
 import com.mmh.vmma.ui.common.CODES;
 import com.mmh.vmma.ui.common.GlobalData;
 import com.mmh.vmma.ui.common.ResponseMessage;
+import com.mmh.vmma.ui.common.Settings;
 import com.mmh.vmma.ui.frames.MainWindow;
 import com.mmh.vmma.ui.templates.JCommonLabel;
 import com.mmh.vmma.ui.templates.JCommonPanel;
@@ -97,6 +98,10 @@ implements ISignageCallBack{
 	
 	private int drugQtyNow  = -1;
 	
+	private int timeDown = 120;
+	private boolean timeoutLogout = false, manualLogout = false;
+
+	
 	//窗口組件
 	private JCommonPanel jpMedicine;
 	private JCommonLabel lblOpenMsg;
@@ -135,7 +140,7 @@ implements ISignageCallBack{
 				lblRturnMessage.setText("");
 
 				medicines = null;
-
+				timedownLogout();
 			}
 		});
 		init();
@@ -224,6 +229,7 @@ implements ISignageCallBack{
 		textPlanSupply.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent e) {
+				resetTimeDown();
 		  		char ekey = e.getKeyChar();
 		  		if((ekey < '0' || ekey > '9') && (ekey != '.')){
 		  			e.setKeyChar('\0');
@@ -239,6 +245,7 @@ implements ISignageCallBack{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				String now = textPlanSupply.getText() == null ? "0" : textPlanSupply.getText();
 				if(Integer.valueOf(now) > 0) {
 					textPlanSupply.setText(String.valueOf(Integer.valueOf(now) - 1));
@@ -258,6 +265,7 @@ implements ISignageCallBack{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				String now = textPlanSupply.getText() == null ? "0" : textPlanSupply.getText();
 				if(Integer.valueOf(now) >= stockQty) {
 					textPlanSupply.setText(String.valueOf((int) Math.floor(stockQty)));
@@ -277,6 +285,7 @@ implements ISignageCallBack{
 		getContentPane().add(btnCancel);
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				manualLogout = true;
 				closeWindow();
 			}
 		});
@@ -288,6 +297,7 @@ implements ISignageCallBack{
 		getContentPane().add(btnOK);
 		btnOK.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				int takeQty = Integer.valueOf(textPlanSupply.getText().trim());
 				
 				if (takeQty <= 0) {
@@ -565,6 +575,7 @@ implements ISignageCallBack{
 			btnCancel.setEnabled(true);
 
 			updateProvidedResult();
+			manualLogout = true;
 			closeWindow();
 		}
 	}
@@ -575,6 +586,36 @@ implements ISignageCallBack{
 	
 	public double getProvidedQty(){
 		return planQty;
+	}
+
+	public boolean getTimeoutLogout() {
+		return timeoutLogout;
+	}
+
+	private void resetTimeDown() {
+    	timeDown = 120;
+    }
+
+	private void timedownLogout() {
+		timeoutLogout = false; 
+		manualLogout = false;
+		new Thread(new Runnable() {
+			public void run() {
+				while ((timeDown > 0) && (!manualLogout)) {
+					try{
+						Thread.sleep(1000);
+					}catch(Exception e){
+						
+					}
+					--timeDown;
+					logger.info("timeDown = {}", timeDown);
+				}
+				if (timeDown <= 0){
+					timeoutLogout = true;
+					closeWindow();
+				}
+			 }
+		}).start();
 	}
 	
 	@Data

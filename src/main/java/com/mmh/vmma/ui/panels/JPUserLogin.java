@@ -38,9 +38,9 @@ import com.mmh.vmma.ui.frames.MainWindow;
 import com.mmh.vmma.ui.templates.JCommonLabel;
 import com.mmh.vmma.ui.templates.JCommonPanel;
 import com.mmh.vmma.ui.templates.JCommonTextField;
-import com.mmh.vmma.ui.templates.JPKeyboard;
+//import com.mmh.vmma.ui.templates.JPKeyboard;
 import com.mmh.vmma.ui.templates.JPlaintButton;
-import com.mmh.vmma.ui.templates.JRoundButton;
+//import com.mmh.vmma.ui.templates.JRoundButton;
 
 /**
  * @author hongftan
@@ -78,9 +78,11 @@ public class JPUserLogin extends JCommonPanel {
 	private JCommonPanel jpLoginInfo;
 	private JCommonLabel lblUserID;
 	private JCommonTextField txtUserID;
-	private JRoundButton btnConfirm;
+//	private JRoundButton btnConfirm;
 	
-	private JPKeyboard jpKeyboard;
+//	private JPKeyboard jpKeyboard;
+	private JCommonPanel jpBottomStatus;
+	private JCommonLabel lblStatusContent;
 
 	public JPUserLogin() {
 		addComponentListener(new ComponentAdapter() {
@@ -111,7 +113,8 @@ public class JPUserLogin extends JCommonPanel {
 			public void componentResized(ComponentEvent e) {
 				int height = getHeight();
 				jpUerIdTitle.setPreferredSize(new Dimension(0, height / 6));
-				jpKeyboard.setPreferredSize(new Dimension(0, height / 2));
+//				jpKeyboard.setPreferredSize(new Dimension(0, height / 2));
+				jpBottomStatus.setPreferredSize(new Dimension(0, 50));
 			}
 		});
 		
@@ -157,7 +160,7 @@ public class JPUserLogin extends JCommonPanel {
 		});
 		jpOptionBar.add(btnExit);
 		
-		lblUserIdShowMessage = new JCommonLabel("請輸入員工編號");
+		lblUserIdShowMessage = new JCommonLabel("請感應員工卡");
 		lblUserIdShowMessage.setFont(new Font("楷体", Font.BOLD, 70));
 		lblUserIdShowMessage.setHorizontalAlignment(SwingConstants.CENTER);
 		jpUerIdTitle.add(lblUserIdShowMessage, BorderLayout.CENTER);
@@ -180,11 +183,11 @@ public class JPUserLogin extends JCommonPanel {
 				txtUserID.setText("");
 				txtUserID.requestFocus();
 				
-				int btnHeight = height * 3 / 10; 
-				int btnWidth = 300;
-				x += 600 - btnWidth;
-				y = height * 3 / 5;
-				btnConfirm.setBounds(x, y, btnWidth, btnHeight);
+//				int btnHeight = height * 3 / 10; 
+//				int btnWidth = 300;
+//				x += 600 - btnWidth;
+//				y = height * 3 / 5;
+//				btnConfirm.setBounds(x, y, btnWidth, btnHeight);
 
 			}
 		});
@@ -222,7 +225,12 @@ public class JPUserLogin extends JCommonPanel {
 //						logger.error("關閉Windows軟鍵盤失敗.", e1);
 //					}
 
-					
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 					logger.debug("输入的用户ID为: {}", userID);
 					logger.debug("用戶名密碼登陸成功。");
 					mainWindow.checkOptions(Settings.OPTION_MKGENERAL_DRUG, "調劑");
@@ -248,35 +256,42 @@ public class JPUserLogin extends JCommonPanel {
 		txtUserID.setColumns(10);
 		
 		//確認按鈕
-		btnConfirm = new JRoundButton("確認");
-		btnConfirm.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(!userIDLogin()){
-					txtUserID.requestFocus();
-					txtUserID.selectAll();
-					logger.debug("登入失敗");
-					return;
-				}
-/************************************************************************************************/
-//				try {
-//					Runtime.getRuntime().exec("cmd /C taskkill /F /IM osk.exe");
-//				} catch (IOException e1) {
-//					logger.error("關閉Windows軟鍵盤失敗.", e1);
+//		btnConfirm = new JRoundButton("確認");
+//		btnConfirm.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				if(!userIDLogin()){
+//					txtUserID.requestFocus();
+//					txtUserID.selectAll();
+//					logger.debug("登入失敗");
+//					return;
 //				}
-
-				logger.debug("用戶名密碼登陸成功。");
-				mainWindow.checkOptions(Settings.OPTION_MKGENERAL_DRUG, "調劑");
-			}
-		});
-							
-		btnConfirm.setFont(new Font("黑体", Font.BOLD, 30));
-		btnConfirm.setIcon(new ImageIcon("images/check.png"));
-		btnConfirm.setForeground(Color.WHITE);
-		btnConfirm.setBounds(106, 382, 300, 100);
-		jpLoginInfo.add(btnConfirm);
+///************************************************************************************************/
+////				try {
+////					Runtime.getRuntime().exec("cmd /C taskkill /F /IM osk.exe");
+////				} catch (IOException e1) {
+////					logger.error("關閉Windows軟鍵盤失敗.", e1);
+////				}
+//
+//				logger.debug("用戶名密碼登陸成功。");
+//				mainWindow.checkOptions(Settings.OPTION_MKGENERAL_DRUG, "調劑");
+//			}
+//		});
+//							
+//		btnConfirm.setFont(new Font("黑体", Font.BOLD, 30));
+//		btnConfirm.setIcon(new ImageIcon("images/check.png"));
+//		btnConfirm.setForeground(Color.WHITE);
+//		btnConfirm.setBounds(106, 382, 300, 100);
+//		jpLoginInfo.add(btnConfirm);
 		
-		jpKeyboard = new JPKeyboard();
-		add(jpKeyboard, BorderLayout.SOUTH);
+//		jpKeyboard = new JPKeyboard();
+//		add(jpKeyboard, BorderLayout.SOUTH);
+		jpBottomStatus = new JCommonPanel();
+		add(jpBottomStatus, BorderLayout.SOUTH);
+		jpBottomStatus.setLayout(new BorderLayout(0, 0));
+		lblStatusContent = new JCommonLabel("i 簡 櫃    ");
+		lblStatusContent.setFont(new Font("標楷體", Font.BOLD, 40));
+		lblStatusContent.setHorizontalAlignment(SwingConstants.RIGHT);
+		jpBottomStatus.add(lblStatusContent, BorderLayout.CENTER);
 		
 	}
 
@@ -285,7 +300,7 @@ public class JPUserLogin extends JCommonPanel {
 		userID = "";
 		empLoginDateTime = "";
 		mainWindow.setLoginUser(null);
-		lblUserIdShowMessage.setText("請輸入員工編號");
+		lblUserIdShowMessage.setText("請感應員工卡");
 		lblUserIdShowMessage.setForeground(Color.BLACK);
 		txtUserID.setText("");
 	}
@@ -320,7 +335,7 @@ public class JPUserLogin extends JCommonPanel {
 		ReqLogin reqLogin = new ReqLogin();
 		reqLogin.getData().setUserName(userID);
 		reqLogin.getData().setEncPassword("");
-		reqLogin.getData().setLoginType(CODES.LOGIN_TYPE_MK);
+		reqLogin.getData().setLoginType(CODES.LOGIN_TYPE_CARD);
 		
 		try {
 			ResLogin resLogin = restLogin.doPost(reqLogin);

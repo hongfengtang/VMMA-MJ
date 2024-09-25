@@ -50,6 +50,8 @@ import com.mmh.vmma.ui.templates.JPlaintButton;
 import com.mmh.vmma.ui.templates.JRoundButton;
 import com.mmh.vmma.utils.CommonUtils;
 
+import lombok.Data;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -61,6 +63,28 @@ import java.awt.event.FocusEvent;
 @Component
 public class JPMKGeneralProvide extends JCommonPanel 
 implements ISignageCallBack{
+	@Data
+	private class QRCodeData {
+		private String sBedId = "";
+		private String sChartNo = "";
+		private String sPatientName = "";
+		private String sMedicineName = "";
+		private String sScienceName = "";
+		private String sEnglishName = "";
+		private String sFormOfDrug = "";
+		private double dDose = 0.0d;
+		private String sFq = "";
+		private String sRoute = "";
+		private double dPlanTakeQty = 0.0d;
+		private String sMedicineId = "";
+		private String sPrescriptionDate = "";
+		private String sPrescriptionTime = "";
+		private String sSex = "";
+		private String sBirthday = "";
+		private String sWardNo = "";
+		private String sWardDepartment = "";
+		private String sSomeId = "";
+	}
 
 	private static final long serialVersionUID = 4174994557349879486L;
 	private static final Logger logger = LogManager.getLogger(JPMKGeneralProvide.class);
@@ -98,13 +122,17 @@ implements ISignageCallBack{
 	private String nowPageNo = "1";
 	
 	private boolean isReading = false;
-
+	
+	private int timeDown = 120;
+	private boolean timeDownRunning = false, timeDownStop = false;
 	/**
 	 * 輸入藥品barcode窗口
 	 */
-	private String title = "調劑 - ";
-	private String barcodeNo1 = "";
-	private String barcodeNo2 = "";
+	private String title = "取藥 - ";
+//	private String barcodeNo1 = "";
+//	private String barcodeNo2 = "";
+	private String orgQRCodeContent = "";
+	private QRCodeData qrCodeData = new QRCodeData();
 	
 //	GetDrugInfoResponse resDrugInfo = new GetDrugInfoResponse();
 	
@@ -118,12 +146,13 @@ implements ISignageCallBack{
 	
 	//barcode輸入區
 	private JCommonPanel jpBarcodeInput;
-	private JCommonLabel lblBarcodeNo1;
-	private JCommonTextField txtBarcodeNo1;
-	private JCommonLabel lblBarcodeNo2;
-	private JCommonTextField txtBarcodeNo2;
-	private JRoundButton btnConfirm;
-	private JRoundButton btnClear;
+//	private JCommonLabel lblBarcodeNo1;
+//	private JCommonTextField txtBarcodeNo1;
+//	private JCommonLabel lblBarcodeNo2;
+//	private JCommonTextField txtBarcodeNo2;
+//	private JRoundButton btnConfirm;
+//	private JRoundButton btnClear;
+	private JCommonTextField txtQRCode;		//for 高雄荣总
 	private JRoundButton btnTerminalDrugsStatus;
 	
 	//藥品庫存量告警顯示區
@@ -158,17 +187,26 @@ implements ISignageCallBack{
 			}
 			@Override
 			public void componentShown(ComponentEvent e) {
-				System.out.println("員工號: " + mainWindow.getUserId() + "; 員工名: " + mainWindow.getUserName());
+				timeDownRunning = true;
+				timeDownStop = false;
+				resetTimeDown();
+				logger.info("員工號: " + mainWindow.getUserId() + "; 員工名: " + mainWindow.getUserName());
 				lblUserId.setText("員工號: " + mainWindow.getUserId() + "; 員工名: " + mainWindow.getUserName());
 //				resDrugInfo.clear();
-				txtBarcodeNo1.setText("");
-				txtBarcodeNo2.setText("");
-				txtBarcodeNo1.requestFocus();
+//				txtBarcodeNo1.setText("");
+//				txtBarcodeNo2.setText("");
+//				txtBarcodeNo1.requestFocus();
+				txtQRCode.setText("");
+				txtQRCode.requestFocus();
 				getAlarmDrugsList();
+				timedownLogout();
 
 			}
 			@Override
 			public void componentHidden(ComponentEvent e) {
+//				timeDown = 0;
+				timeDownRunning = false;
+				timeDownStop = true;
 				initTables();
 			}
 			
@@ -208,7 +246,7 @@ implements ISignageCallBack{
 		lblUserId.setBounds(0, 0, 200, 30);
 		jpOptionBar.add(lblUserId);
 		
-		lblShowMessage = new JCommonLabel(title + "請掃描藥袋下方條碼");
+		lblShowMessage = new JCommonLabel(title + "請掃描醫囑二維碼");
 		lblShowMessage.setFont(new Font("楷体", Font.BOLD, 60));
 		lblShowMessage.setHorizontalAlignment(SwingConstants.CENTER);
 		jpTitle.add(lblShowMessage, BorderLayout.CENTER);
@@ -220,8 +258,9 @@ implements ISignageCallBack{
 		btnBack.setBounds(291, 382, 143, 88);
 		btnBack.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				timeDownStop = true;
 				logout();
-				mainWindow.checkOptions(Settings.OPTIION_LOGIN, "登錄");
+				mainWindow.checkOptions(Settings.OPTION_LOGIN, "登錄");
 			}
 		});
 		jpTitle.add(btnBack, BorderLayout.EAST);
@@ -237,19 +276,19 @@ implements ISignageCallBack{
 				//标签长度为270,输入框长度为500
 				int x = (width - 870) / 2;
 				int y = height / 5 - 32;		
-				lblBarcodeNo1.setBounds(x, y, 270, 64); //控件64高
-				x += 270;
-				txtBarcodeNo1.setBounds(x, y, 600, 64);
-				txtBarcodeNo1.setText("");
-				txtBarcodeNo1.requestFocus();
-				
-				x = (width - 870) / 2;
-				y = height / 2 - 32;
-				lblBarcodeNo2.setBounds(x, y, 270, 64); //控件64高
-				x += 270;
-				txtBarcodeNo2.setBounds(x, y, 600, 64);
-				txtBarcodeNo2.setText("");
-				txtBarcodeNo2.requestFocus();
+//				lblBarcodeNo1.setBounds(x, y, 270, 64); //控件64高
+//				x += 270;
+//				txtBarcodeNo1.setBounds(x, y, 600, 64);
+//				txtBarcodeNo1.setText("");
+//				txtBarcodeNo1.requestFocus();
+//				
+//				x = (width - 870) / 2;
+//				y = height / 2 - 32;
+//				lblBarcodeNo2.setBounds(x, y, 270, 64); //控件64高
+//				x += 270;
+//				txtBarcodeNo2.setBounds(x, y, 600, 64);
+//				txtBarcodeNo2.setText("");
+//				txtBarcodeNo2.requestFocus();
 
 				int gap = (width - 900) / 4;
 				x = gap;
@@ -257,15 +296,19 @@ implements ISignageCallBack{
 				int btnWidth = 300;
 				
 				y = height * 2 / 3; 				
+//				btnTerminalDrugsStatus.setBounds(x, y, btnWidth, btnHeight);
+//				
+//				x += btnWidth;
+//				x+= gap;
+//				btnClear.setBounds(x, y, btnWidth, btnHeight);
+//				
+//				x += btnWidth;
+//				x+=gap;
+//				btnConfirm.setBounds(x, y, btnWidth, btnHeight);
+				
+				x += 2 * btnWidth;
+				x += gap;
 				btnTerminalDrugsStatus.setBounds(x, y, btnWidth, btnHeight);
-				
-				x += btnWidth;
-				x+= gap;
-				btnClear.setBounds(x, y, btnWidth, btnHeight);
-				
-				x += btnWidth;
-				x+=gap;
-				btnConfirm.setBounds(x, y, btnWidth, btnHeight);
 
 			}
 		});
@@ -273,126 +316,165 @@ implements ISignageCallBack{
 	
 		jpBarcodeInput.setLayout(null);
 		
-		lblBarcodeNo1 = new JCommonLabel("藥袋下方條碼：");
-		lblBarcodeNo1.setBounds(61, 10, 270, 41);
-		lblBarcodeNo1.setFont(new Font("黑体", Font.BOLD, 35));
-//		lblBarcodeNo1.setIcon(new ImageIcon("images/account.png"));
-		jpBarcodeInput.add(lblBarcodeNo1);
-		
-		txtBarcodeNo1 = new JCommonTextField();
-		txtBarcodeNo1.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				lblShowMessage.setText(title + "請掃描藥袋下方條碼");
-				txtBarcodeNo1.selectAll();
-			}
-		});
-		txtBarcodeNo1.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER){
-					if(txtBarcodeNo1.getText().length() > 0){
-						barcodeNo1 = txtBarcodeNo1.getText();
-						txtBarcodeNo2.setText("");
-						txtBarcodeNo2.requestFocus();
-					}else{
-						txtBarcodeNo1.selectAll();
-						txtBarcodeNo1.requestFocus();
-					}
-				}
-			}
-		});
-		
-		txtBarcodeNo1.setFont(new Font("黑体", Font.BOLD, 40));
-		txtBarcodeNo1.setBounds(27, 64, 500, 64);
-		jpBarcodeInput.add(txtBarcodeNo1);
-		txtBarcodeNo1.setColumns(10);
+//		lblBarcodeNo1 = new JCommonLabel("藥袋下方條碼：");
+//		lblBarcodeNo1.setBounds(61, 10, 270, 41);
+//		lblBarcodeNo1.setFont(new Font("黑体", Font.BOLD, 35));
+////		lblBarcodeNo1.setIcon(new ImageIcon("images/account.png"));
+//		jpBarcodeInput.add(lblBarcodeNo1);
+//		
+//		txtBarcodeNo1 = new JCommonTextField();
+//		txtBarcodeNo1.addFocusListener(new FocusAdapter() {
+//			@Override
+//			public void focusGained(FocusEvent e) {
+//				lblShowMessage.setText(title + "請掃描醫囑二維碼");
+//				txtBarcodeNo1.selectAll();
+//			}
+//		});
+//		txtBarcodeNo1.addKeyListener(new KeyAdapter() {
+//			@Override
+//			public void keyPressed(KeyEvent e) {
+//				if(e.getKeyCode() == KeyEvent.VK_ENTER){
+//					if(txtBarcodeNo1.getText().length() > 0){
+//						barcodeNo1 = txtBarcodeNo1.getText();
+//						txtBarcodeNo2.setText("");
+//						txtBarcodeNo2.requestFocus();
+//					}else{
+//						txtBarcodeNo1.selectAll();
+//						txtBarcodeNo1.requestFocus();
+//					}
+//				}
+//			}
+//		});
+//		
+//		txtBarcodeNo1.setFont(new Font("黑体", Font.BOLD, 40));
+//		txtBarcodeNo1.setBounds(27, 64, 500, 64);
+//		jpBarcodeInput.add(txtBarcodeNo1);
+//		txtBarcodeNo1.setColumns(10);
+//
+//		lblBarcodeNo2 = new JCommonLabel("藥袋上方條碼：");
+//		lblBarcodeNo2.setBounds(61, 138, 270, 50);
+//		lblBarcodeNo2.setFont(new Font("黑体", Font.BOLD, 35));
+//		jpBarcodeInput.add(lblBarcodeNo2);
+//		
+//		txtBarcodeNo2 = new JCommonTextField();
+//		txtBarcodeNo2.addFocusListener(new FocusAdapter() {
+//			@Override
+//			public void focusGained(FocusEvent e) {
+//				lblShowMessage.setText(title + "請掃描醫囑二維碼");
+//				txtBarcodeNo2.selectAll();
+//			}
+//		});
+//		txtBarcodeNo2.addKeyListener(new KeyAdapter() {
+//			@Override
+//			public void keyPressed(KeyEvent e) {
+//				if(e.getKeyCode() == KeyEvent.VK_ENTER){
+//					if(txtBarcodeNo2.getText().length() > 0){
+//						barcodeNo2 = txtBarcodeNo2.getText();
+//						if(!provideDrug()){
+//							txtBarcodeNo1.requestFocus();
+//							txtBarcodeNo1.selectAll();
+//							return;
+//						}
+//
+//						mainWindow.checkOptions(Settings.OPTION_MKGENERAL_DRUG, "調劑");
+//					}else{
+//						txtBarcodeNo2.selectAll();
+//						txtBarcodeNo2.requestFocus();
+//					}
+//				}
+//			}
+//		});
+//
+//		txtBarcodeNo2.setFont(new Font("黑体", Font.BOLD, 40));
+//		txtBarcodeNo2.setBounds(27, 64, 500, 64);
+//		jpBarcodeInput.add(txtBarcodeNo2);
+//		txtBarcodeNo2.setColumns(10);
+//
+//		btnConfirm = new JRoundButton("確認");
+//		btnConfirm.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				barcodeNo1 = txtBarcodeNo1.getText();
+//				if((barcodeNo1 == null) || (barcodeNo1.length() <= 0)){
+//					JOptionPane.showMessageDialog(null,  "請輸入藥品條碼！", "錯誤", JOptionPane.ERROR_MESSAGE);
+//					txtBarcodeNo1.requestFocus();
+//					txtBarcodeNo1.selectAll();
+//					return;
+//				}
+//				barcodeNo2 = txtBarcodeNo2.getText();
+//				if((barcodeNo2 == null) || (barcodeNo2.length() <= 0)){
+//					JOptionPane.showMessageDialog(null,  "請輸入藥品條碼！", "錯誤", JOptionPane.ERROR_MESSAGE);
+//					txtBarcodeNo2.requestFocus();
+//					txtBarcodeNo2.selectAll();
+//					return;
+//				}
+//				//輸入員工號后登陸
+//				if(!provideDrug()){
+//					txtBarcodeNo1.requestFocus();
+//					txtBarcodeNo1.selectAll();
+//					return;
+//				}
+//				mainWindow.checkOptions(Settings.OPTION_MKGENERAL_DRUG, "調劑");
+//			}
+//		});
+//		btnConfirm.setFont(new Font("黑体", Font.BOLD, 30));
+//		btnConfirm.setIcon(new ImageIcon("images/check.png"));
+//		btnConfirm.setForeground(Color.WHITE);
+//		btnConfirm.setBounds(106, 382, 300, 100);
+//		jpBarcodeInput.add(btnConfirm);
+//
+//		btnClear = new JRoundButton("清除");
+//		btnClear.setFont(new Font("黑体", Font.BOLD, 30));
+//		btnClear.setIcon(new ImageIcon("images/clear.png"));
+//		btnClear.setForeground(Color.WHITE);
+//		btnClear.setBounds(291, 382, 143, 88);
+//		btnClear.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				txtBarcodeNo1.setText("");
+//				txtBarcodeNo2.setText("");
+//				txtBarcodeNo1.requestFocus();
+//			}
+//		});
+//		jpBarcodeInput.add(btnClear);
 
-		lblBarcodeNo2 = new JCommonLabel("藥袋上方條碼：");
-		lblBarcodeNo2.setBounds(61, 138, 270, 50);
-		lblBarcodeNo2.setFont(new Font("黑体", Font.BOLD, 35));
-		jpBarcodeInput.add(lblBarcodeNo2);
-		
-		txtBarcodeNo2 = new JCommonTextField();
-		txtBarcodeNo2.addFocusListener(new FocusAdapter() {
+		txtQRCode = new JCommonTextField();
+		txtQRCode.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
-				lblShowMessage.setText(title + "請掃描藥袋上方條碼");
-				txtBarcodeNo2.selectAll();
+				lblShowMessage.setText(title + "請掃描醫囑二維碼");
+				txtQRCode.selectAll();
 			}
 		});
-		txtBarcodeNo2.addKeyListener(new KeyAdapter() {
+		txtQRCode.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
+				resetTimeDown();
 				if(e.getKeyCode() == KeyEvent.VK_ENTER){
-					if(txtBarcodeNo2.getText().length() > 0){
-						barcodeNo2 = txtBarcodeNo2.getText();
+					logger.info("收到文本{}", txtQRCode.getText());
+					if(txtQRCode.getText().length() > 0){
+						orgQRCodeContent = txtQRCode.getText();
+						analyseQRCode(orgQRCodeContent);
+						timeDownRunning = false;
 						if(!provideDrug()){
-							txtBarcodeNo1.requestFocus();
-							txtBarcodeNo1.selectAll();
+							resetTimeDown();
+							timeDownRunning = true;
+							resetWindow();
 							return;
 						}
 
 						mainWindow.checkOptions(Settings.OPTION_MKGENERAL_DRUG, "調劑");
 					}else{
-						txtBarcodeNo2.selectAll();
-						txtBarcodeNo2.requestFocus();
+						resetWindow();
 					}
 				}
 			}
 		});
-
-		txtBarcodeNo2.setFont(new Font("黑体", Font.BOLD, 40));
-		txtBarcodeNo2.setBounds(27, 64, 500, 64);
-		jpBarcodeInput.add(txtBarcodeNo2);
-		txtBarcodeNo2.setColumns(10);
-
-		btnConfirm = new JRoundButton("確認");
-		btnConfirm.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				barcodeNo1 = txtBarcodeNo1.getText();
-				if((barcodeNo1 == null) || (barcodeNo1.length() <= 0)){
-					JOptionPane.showMessageDialog(null,  "請輸入藥品條碼！", "錯誤", JOptionPane.ERROR_MESSAGE);
-					txtBarcodeNo1.requestFocus();
-					txtBarcodeNo1.selectAll();
-					return;
-				}
-				barcodeNo2 = txtBarcodeNo2.getText();
-				if((barcodeNo2 == null) || (barcodeNo2.length() <= 0)){
-					JOptionPane.showMessageDialog(null,  "請輸入藥品條碼！", "錯誤", JOptionPane.ERROR_MESSAGE);
-					txtBarcodeNo2.requestFocus();
-					txtBarcodeNo2.selectAll();
-					return;
-				}
-				//輸入員工號后登陸
-				if(!provideDrug()){
-					txtBarcodeNo1.requestFocus();
-					txtBarcodeNo1.selectAll();
-					return;
-				}
-				mainWindow.checkOptions(Settings.OPTION_MKGENERAL_DRUG, "調劑");
-			}
-		});
-		btnConfirm.setFont(new Font("黑体", Font.BOLD, 30));
-		btnConfirm.setIcon(new ImageIcon("images/check.png"));
-		btnConfirm.setForeground(Color.WHITE);
-		btnConfirm.setBounds(106, 382, 300, 100);
-		jpBarcodeInput.add(btnConfirm);
-
-		btnClear = new JRoundButton("清除");
-		btnClear.setFont(new Font("黑体", Font.BOLD, 30));
-		btnClear.setIcon(new ImageIcon("images/clear.png"));
-		btnClear.setForeground(Color.WHITE);
-		btnClear.setBounds(291, 382, 143, 88);
-		btnClear.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				txtBarcodeNo1.setText("");
-				txtBarcodeNo2.setText("");
-				txtBarcodeNo1.requestFocus();
-			}
-		});
-		jpBarcodeInput.add(btnClear);
 		
+		txtQRCode.setFont(new Font("黑体", Font.BOLD, 40));
+		txtQRCode.setBounds(0, 0, 1, 1);
+		txtQRCode.setVisible(true);
+		jpBarcodeInput.add(txtQRCode);
+		txtQRCode.setColumns(10);
+
 		btnTerminalDrugsStatus = new JRoundButton("即時藥存量");
 		btnTerminalDrugsStatus.setFont(new Font("黑体", Font.BOLD, 30));
 		btnTerminalDrugsStatus.setIcon(new ImageIcon("images/medicines.png"));
@@ -474,6 +556,7 @@ implements ISignageCallBack{
 		btn1stPage.setFont(new Font("黑体", Font.PLAIN, 17));
 		btn1stPage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				txtPageNo.setText("1");
 				nowPageNo = txtPageNo.getText().trim();
 				refreshMedicineList();
@@ -486,6 +569,7 @@ implements ISignageCallBack{
 		btnPreviousPage.setFont(new Font("黑体", Font.PLAIN, 17));
 		btnPreviousPage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				int currentPage = Integer.valueOf(txtPageNo.getText());
 				if (currentPage <= 1)
 					return;
@@ -503,6 +587,7 @@ implements ISignageCallBack{
 		btnNextPage.setFont(new Font("黑体", Font.PLAIN, 17));
 		btnNextPage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				int currentPage = Integer.valueOf(txtPageNo.getText());
 				if (currentPage >= pages)
 					return;
@@ -519,6 +604,7 @@ implements ISignageCallBack{
 		btnLastPage.setFont(new Font("黑体", Font.PLAIN, 17));
 		btnLastPage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				txtPageNo.setText(String.valueOf(pages));
 				nowPageNo = txtPageNo.getText().trim();
 				refreshMedicineList();
@@ -531,6 +617,7 @@ implements ISignageCallBack{
 		txtPageNo.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent e) {
+				resetTimeDown();
 		  		char ekey = e.getKeyChar();
 		  		if(ekey < '0' || ekey > '9'){
 		  			e.setKeyChar('\0');
@@ -549,6 +636,7 @@ implements ISignageCallBack{
 		btnJumpToPage.setToolTipText("跳轉至");
 		btnJumpToPage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				resetTimeDown();
 				refreshMedicineList();
 			}
 		});
@@ -557,10 +645,52 @@ implements ISignageCallBack{
 		
 	}
 	
+	private void resetWindow() {
+		txtQRCode.selectAll();
+		txtQRCode.requestFocus();
+	}
+	
+	private boolean analyseQRCode(String input){
+		logger.info("讀取到的二維碼內容為[{}]", input);
+		
+		if (input == null || input.length() <= 0) {
+			return false;
+		}
+		String[] qrCodeFields = input.split(";");
+		
+		if (qrCodeFields.length != 19) {
+			logger.error("讀取的二維碼內容格式不正確！");
+			resetWindow();
+			return false;
+		}
+		
+		qrCodeData.setSBedId(String.valueOf(qrCodeFields[0]));
+		qrCodeData.setSChartNo(String.valueOf(qrCodeFields[1]));
+		qrCodeData.setSPatientName(String.valueOf(qrCodeFields[2]));
+		qrCodeData.setSMedicineName(String.valueOf(qrCodeFields[3]));
+		qrCodeData.setSScienceName(String.valueOf(qrCodeFields[4]));
+		qrCodeData.setSEnglishName(String.valueOf(qrCodeFields[5]));
+		qrCodeData.setSFormOfDrug(String.valueOf(qrCodeFields[6]));
+		qrCodeData.setDDose(Double.valueOf(qrCodeFields[7]));
+		qrCodeData.setSFq(String.valueOf(qrCodeFields[8]));
+		qrCodeData.setSRoute(String.valueOf(qrCodeFields[9]));
+		qrCodeData.setDPlanTakeQty(Double.valueOf(qrCodeFields[10]));
+		qrCodeData.setSMedicineId(String.valueOf(qrCodeFields[11]));
+		qrCodeData.setSPrescriptionDate(String.valueOf(qrCodeFields[12]));
+		qrCodeData.setSPrescriptionTime(String.valueOf(qrCodeFields[13]));
+		qrCodeData.setSSex(String.valueOf(qrCodeFields[14]));
+		qrCodeData.setSBirthday(String.valueOf(qrCodeFields[15]));
+		qrCodeData.setSWardNo(String.valueOf(qrCodeFields[16]));
+		qrCodeData.setSWardDepartment(String.valueOf(qrCodeFields[17]));
+		qrCodeData.setSSomeId(String.valueOf(qrCodeFields[18]));
+		
+		return true;
+	}
+	
 	private boolean provideDrug() {
 		
-		barcodeNo1 = txtBarcodeNo1.getText();
-		barcodeNo2 = txtBarcodeNo2.getText();
+//		barcodeNo1 = txtBarcodeNo1.getText();
+//		barcodeNo2 = txtBarcodeNo2.getText();
 		isReading = false;
 		new Thread(new Runnable() {
 			public void run() {
@@ -598,11 +728,18 @@ implements ISignageCallBack{
 			lblShowMessage.setText(title + "沒有待取藥物列表。");
 			return false;
 		}
-		txtBarcodeNo1.setText("");
-		txtBarcodeNo2.setText("");
+//		txtBarcodeNo1.setText("");
+//		txtBarcodeNo2.setText("");
+		txtQRCode.setText("");
 		dlgGeneralProviding.setMedicine(data);
 		dlgGeneralProviding.setModal(true);
 		dlgGeneralProviding.setVisible(true);
+		
+		if (dlgGeneralProviding.getTimeoutLogout()){
+			logout();
+			mainWindow.checkOptions(Settings.OPTION_LOGIN, "登錄");
+			return false;
+		}
 		
 		return true;
 	}
@@ -616,10 +753,10 @@ implements ISignageCallBack{
 			ReqProvideQuery reqProvideQuery = new ReqProvideQuery();
 			reqProvideQuery.setToken(mainWindow.getUserToken());
 			reqProvideQuery.getData().setTerminalId(globalData.getTerminalId());
-			reqProvideQuery.getData().setChartNo("");
+			reqProvideQuery.getData().setChartNo("vghks001");
 			reqProvideQuery.getData().setPhrOrderNo("");
-			reqProvideQuery.getData().setBarcodeNo1(barcodeNo1);
-			reqProvideQuery.getData().setBarcodeNo2(barcodeNo2);
+			reqProvideQuery.getData().setBarcodeNo1(orgQRCodeContent);
+			reqProvideQuery.getData().setBarcodeNo2("");
 			reqProvideQuery.getData().getMedicinedata();
 			ResProvideQuery resProvideQuery = restProvideQuery.doPost(reqProvideQuery);
 			
@@ -647,8 +784,9 @@ implements ISignageCallBack{
 	}
 	
 	private void initTables() {
-		txtBarcodeNo1.setText("");
-		txtBarcodeNo2.setText("");
+//		txtBarcodeNo1.setText("");
+//		txtBarcodeNo2.setText("");
+		txtQRCode.setText("");
 		tblAlarmDrugs.removeAll();
 		DefaultTableModel mdMedicines = new DefaultTableModel();
 
@@ -804,5 +942,32 @@ implements ISignageCallBack{
 		}
 
     }
-	
+    
+    private void resetTimeDown() {
+    	timeDown = 120;
+    }
+
+	private void timedownLogout() {
+		timeDown = 120;
+		new Thread(new Runnable() {
+			public void run() {
+				while ((timeDown > 0) && (!timeDownStop)){
+					try{
+						Thread.sleep(1000);
+					}catch(Exception e){
+						
+					}
+					if (timeDownRunning) {
+						--timeDown;
+					}
+					logger.info("timeDown = {}", timeDown);
+				}
+				if (timeDown <= 0){
+					logout();
+					mainWindow.checkOptions(Settings.OPTION_LOGIN, "登錄");
+				}
+			 }
+		}).start();
+	}
+
 }
