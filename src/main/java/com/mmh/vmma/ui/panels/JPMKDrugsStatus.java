@@ -157,7 +157,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		jpTitle.setLayout(new BorderLayout(0, 0));
 		add(jpTitle, BorderLayout.NORTH);
 		
-		lblShowMessage = new JCommonLabel("馬偕醫院 - 即時藥存量列表");
+		lblShowMessage = new JCommonLabel("即時藥存量列表");
 		lblShowMessage.setHorizontalAlignment(SwingConstants.CENTER);
 		lblShowMessage.setFont(new Font("楷体", Font.BOLD, 40));
 		jpTitle.add(lblShowMessage);
@@ -330,6 +330,7 @@ public class JPMKDrugsStatus extends JCommonPanel {
 		btnBatchProvide.setIcon(new ImageIcon("images/medicines.png"));
 		btnBatchProvide.setBounds(401, 7, 80, 50);
 		btnBatchProvide.setEnabled(false);
+		btnBatchProvide.setVisible(false);
 		btnBatchProvide.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int row = tblMedicines.getSelectedRow();
