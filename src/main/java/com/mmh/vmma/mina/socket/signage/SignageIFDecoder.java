@@ -62,8 +62,8 @@ public class SignageIFDecoder extends CumulativeProtocolDecoder {
 			buffer.mark();
 			//取得字符串長度
 			if(buffer.limit() >= 10) {
-				int msgLength = buffer.get(1);
-				msgLength += buffer.get(2) << 8;
+				int msgLength = buffer.get(1) & 0xFF;
+				msgLength += (buffer.get(2) & 0xFF) << 8;
 //				logger.debug("$$$$$$$$$$$$$$$$$-------{}-------$$$$$$$$$$$$$$$$$", msgLength);
 				
 				if ((msgLength <= 0) || (msgLength +3 != buffer.limit())) {

@@ -380,7 +380,10 @@ public class Vendout extends FlowFactory{
 						//re-send message
 						if(countVendoutStatus >= 3) {
 							countVendoutStatus = 0;
-							return VENDOUT_STATUS.RETRY;
+							vmSaleSetting.setStatus(ACTION_STATUS.COMPLETION);
+							runCompleted = true;
+							continue;
+//							return VENDOUT_STATUS.RETRY;
 						}
 						continue;
 					}
