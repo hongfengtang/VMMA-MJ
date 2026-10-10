@@ -221,7 +221,7 @@ implements ISignageCallBack{
 		btnBack.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				logout();
-				mainWindow.checkOptions(Settings.OPTIION_LOGIN, "登錄");
+				mainWindow.checkOptions(Settings.OPTION_LOGIN, "登錄");
 			}
 		});
 		jpTitle.add(btnBack, BorderLayout.EAST);

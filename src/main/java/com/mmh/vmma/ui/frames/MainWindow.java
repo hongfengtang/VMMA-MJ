@@ -213,7 +213,7 @@ public class MainWindow extends JFrame {
 	 * */
 	public void checkOptions(int option, String optionType){
 		switch (option){
-		case Settings.OPTIION_LOGIN:
+		case Settings.OPTION_LOGIN:
 			loginUser= null;
 			jpStatus.setPreferredSize(new Dimension(0, 0));
 			card.show(cardPanel,  Settings.PAGE_TMP);

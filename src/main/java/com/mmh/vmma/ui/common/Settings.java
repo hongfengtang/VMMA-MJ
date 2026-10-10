@@ -43,7 +43,7 @@ public class Settings {
 	public static final String PAGE_MKDRUGS_STATUS = "mackaydrugsstatus";	//馬偕藥品列表狀態頁面
 	
 	
-	public static final int OPTIION_LOGIN = 1;
+	public static final int OPTION_LOGIN = 1;
 	public static final int OPTION_GENERAL_DRUG = 2;
 	public static final int OPTION_EMERGENCY_DRUG = 3;
 	public static final int OPTION_TEMPORARY_DRUG = 4;
