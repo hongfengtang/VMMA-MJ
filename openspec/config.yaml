@@ -1,0 +1,67 @@
+schema: spec-driven
+
+# 注入到所有产物（proposal / specs / design / tasks）的项目上下文，上限 50KB。
+# 只写稳定事实与约定；细节放在 docs/ 中并在此引用。
+context: |
+  ## 项目
+  VMMA-MJ：马偕医院针剂药品柜（管制類藥品櫃）终端的桌面客户端。
+  员工登录后扫描药袋双条码，客户端向中控查询调剂计划，驱动药品柜逐储位出药，
+  再将储位级结果回传中控。
+
+  ## 分支即客户变体
+  - mj2 = 马偕（当前分支）；ghnz = 高雄荣总测试版；master 基本停滞。三者自 da2588b 分叉后独立演进。
+  - 通用修复需要在各分支分别实施（例如 SignageIFDecoder 长度解析修复曾在 mj2 和 ghnz 各做一次）。
+  - 本分支的 openspec/ 只描述 mj2 的行为；客户定制行为必须显式标注。
+
+  ## 技术栈与硬约束
+  - Java 8（必须使用 JDK 8：图片工具依赖 sun.misc 内部类）；单模块 Maven（Wrapper 3.6.3）；主包 com.mmh.vmma。
+  - Spring Boot 2.4.3 + WebApplicationType.NONE：Swing 桌面程序，不提供任何 Web / HTTP 服务。
+  - 中控：RestTemplate + Apache HttpClient 发送 HTTP(S) POST；中控服务端不在本仓库。
+  - 药品柜：Apache MINA 2.1.4，TCP 自定义二进制协议；控制器固件不在本仓库。
+  - 本地 SQLite（Spring Data JPA）只保存系统配置，不是处方、库存或取药结果的权威数据库。
+  - 业务编排直接写在 Swing 页面、对话框和出药流程类中，没有独立的 Service 层。
+
+  ## 关键业务语义
+  - “成功”分三层，任何产物都不得混用：① 设备流程成功 ② 中控回写成功 ③ 实物对账完成。
+  - 设备出药与中控回写不在同一事务中，也没有持久化补传队列；网络故障可能导致“已出药、未记账”。
+  - 设备连接是单一共享客户端与队列；配置多个端口不等于支持多柜隔离。
+  - 隐藏或未接线的功能（批次取药、库存搜索、JPFunctions 菜单、闲置自动登出等）不属于当前功能。
+
+  ## 权威文档（写产物前先查对应章节；引用章节，不复制内容）
+  - docs/ARCHITECTURE.md：系统边界、模块、启动与调剂时序、完成语义
+  - docs/DETAILED_DESIGN.md：配置、中控接口、TCP 协议、Vendout 状态机、已知限制
+  - docs/OPERATIONS.md：部署、操作、异常处理、现场验收
+  - docs/README.md 第 6 节：代码变动与文档同步对照表
+  - CHANGELOG.md：历史需求与修改记录
+
+  ## 构建与验证现状
+  - 构建命令：bash mvnw -Dexec.skip=true package（Windows：mvnw.cmd -Dexec.skip=true package）。
+  - pom.xml 的 Surefire 配置硬编码 skipTests=true；src/test 多为手工实验程序；没有自动化端到端验证。
+  - 构建成功不代表功能已验证；设备和中控相关行为需要联调或现场确认。
+
+  ## 写作约定
+  - 产物使用简体中文；界面文字保留源码中的繁体原文（如「確認」「調劑操作確認」）。
+  - OpenSpec 结构关键字保持英文：## Purpose、## Requirements、### Requirement:、#### Scenario:、
+    **WHEN** / **THEN**，以及规范性关键字 SHALL / MUST。
+  - 示例只使用占位值；不得写入真实账号、口令、token、内部地址、患者资料或未脱敏的日志。
+
+# 按产物追加的规则（在 schema 内置指引之外补充）。
+rules:
+  proposal:
+    - "注明代码基线（分支 + 提交）和需求来源（客户或提出人）"
+    - "说明是否属于客户定制，以及会影响三层“成功”中的哪几层"
+    - "通用修复（非客户定制）须在 Impact 中注明是否需要同步到其他客户分支（如 ghnz）"
+    - "出药行为有变化时，须在 Impact 中列出对现场对账和操作手册的影响"
+  specs:
+    - "每条 Requirement 标题下的第一行正文必须包含英文 SHALL 或 MUST，且前面不要放其他行（校验器只检查这一行）"
+    - "只描述在界面、中控 HTTP 或设备 TCP 边界上可观察的行为；类名、字节布局等实现细节改为引用 docs/DETAILED_DESIGN.md 的章节"
+    - "客户定制的 Requirement 名称加【马偕定制】前缀，便于移植到其他客户分支时识别"
+    - "不为隐藏、未接线或只有模型的功能编写 Requirement"
+  design:
+    - "涉及出药流程时，须说明部分出药、设备异常、断网和回写失败时的结果语义与对账方式"
+    - "新增依赖或使用新 API 时，须确认 JDK 8 兼容"
+  tasks:
+    - "必须包含：按 docs/README.md 第 6 节对照表同步 docs/ 下的文档"
+    - "必须包含：在 CHANGELOG.md 顶部追加条目，沿用“日期标题 + Change Requirement - 马偕针剂版本”的格式"
+    - "必须包含：运行 bash mvnw -Dexec.skip=true package 做构建验证"
+    - "必须包含：手工、联调或现场验证项，并区分“已验证”和“待现场确认”"
