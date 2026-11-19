@@ -26,11 +26,11 @@
 
 ## 5. 归档准备
 
-- [ ] 5.1 定稿三个主规格的 Purpose 文本（如下）；归档同步时用它们替换自动生成的 “TBD”，并运行 `openspec validate --specs --strict`
+- [x] 5.1 定稿三个主规格的 Purpose 文本（如下）；归档同步时用它们替换自动生成的 “TBD”，并运行 `openspec validate --specs --strict`
   - `barcode-dispensing`：描述调剂页通过药袋双条码向中控查询调剂计划、计划显示后自动按储位出药、归集储位结果并回写中控的行为（基线：mj2 / b8e9ebe）。
   - `vendout-flow`：描述单个储位出药任务的串行排队、逐包四步设备交互、STEP4 完成判定（含马偕定制路径）、无进展超时与失败回调（基线：mj2 / b8e9ebe）。
   - `cabinet-protocol`：描述终端与药品柜控制器之间的 TCP 连接、重连与保活、帧结构与转义、长度解析、接收分派与命令确认匹配（基线：mj2 / b8e9ebe）。
-  - 状态：Purpose 文本已定稿；替换 “TBD” 和规格校验在归档时执行，届时勾选本项。
+  - 状态：已于归档时（2026-11-19）替换三个主规格的 “TBD”；`openspec validate --specs --strict` 3/3 通过。
 
 ## 验证记录（2026-11-19）
 
