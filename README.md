@@ -29,6 +29,7 @@ VMMA 是基于 Java Swing 和 Spring Boot 的药品柜供药桌面终端，通�
 | [详细设计](docs/DETAILED_DESIGN.md) | 配置、数据模型、中控接口、设备协议与状态机 |
 | [操作手册](docs/OPERATIONS.md) | 部署、登录、调剂、查询、维护与故障处理 |
 | [变更记录](CHANGELOG.md) | 历史需求和修改记录 |
+| [行为规格与变更](openspec/) | OpenSpec 管理的当前行为规格（`specs/`）与需求变更提案（`changes/`），流程见[文档目录](docs/README.md)第 6 节 |
 
 ## 技术与项目结构
 
@@ -38,6 +39,7 @@ Java 8、Spring Boot 2.4.3、Swing、Spring Data JPA / SQLite、Apache MINA 2.1.
 VMMA-MJ/
 ├── README.md
 ├── docs/                      # 架构、详细设计与操作手册
+├── openspec/                  # OpenSpec 行为规格（specs/）与需求变更（changes/）
 ├── pom.xml                    # 依赖、打包和混淆配置
 ├── mvnw / mvnw.cmd            # Maven 3.6.3 Wrapper
 ├── src/main/java/com/mmh/vmma/

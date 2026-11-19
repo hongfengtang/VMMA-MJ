@@ -1,3 +1,10 @@
+# 2026-11-19
+Change Requirement - 马偕针剂版本
+1. 引入 OpenSpec 管理需求变更：新增 openspec/（config.yaml 中的项目上下文与产物规则），以及 GitHub Copilot、Claude、Cursor 的 /opsx 命令和技能文件。
+2. 通过变更 adopt-openspec-baseline 为三个核心能力建立基线规格：barcode-dispensing（双条码调剂）、vendout-flow（单储位出药流程，含马偕定制的 STEP4 判完成路径）、cabinet-protocol（药品柜 TCP 协议）。规格基线为 mj2 / b8e9ebe，未修改代码。
+3. docs/README.md、README.md 登记 openspec/ 的职责和变更流程。
+4. 基线梳理中发现 6 项待处理问题（例如库存不足提示会在出药进行中提前启用「確定」），记录在该变更的 design.md 中，另行立项修复。
+
 # 2026-10-10
 Change Requirement - 马偕针剂版本
 1. 修正 SignageIFDecoder 报文长度解析：按无符号小端方式读取两个长度字节，避免字节符号扩展导致长度计算错误。
