@@ -27,6 +27,9 @@ VMMA 是基于 Java Swing 和 Spring Boot 的药品柜供药桌面终端，通�
 | [文档目录](docs/README.md) | 阅读顺序与维护约定 |
 | [项目架构](docs/ARCHITECTURE.md) | 系统边界、模块、部署及关键流程 |
 | [详细设计](docs/DETAILED_DESIGN.md) | 配置、数据模型、中控接口、设备协议与状态机 |
+| [中控接口说明](docs/CONTROL_CENTER_API.md) | 7 个中控接口的字段、示例报文与客户端处理 |
+| [药品柜报文说明](docs/SIGNAGE_PROTOCOL.md) | 药品柜 TCP 帧格式、消息字节布局与出药交互时序 |
+| [数据库说明](docs/DATABASE.md) | 配置库与历史库的表、视图、触发器及字段说明 |
 | [操作手册](docs/OPERATIONS.md) | 部署、登录、调剂、查询、维护与故障处理 |
 | [变更记录](CHANGELOG.md) | 历史需求和修改记录 |
 | [行为规格与变更](openspec/) | OpenSpec 管理的当前行为规格（`specs/`）与需求变更提案（`changes/`），流程见[文档目录](docs/README.md)第 6 节 |

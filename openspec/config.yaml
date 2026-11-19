@@ -30,6 +30,9 @@ context: |
   ## 权威文档（写产物前先查对应章节；引用章节，不复制内容）
   - docs/ARCHITECTURE.md：系统边界、模块、启动与调剂时序、完成语义
   - docs/DETAILED_DESIGN.md：配置、中控接口、TCP 协议、Vendout 状态机、已知限制
+  - docs/CONTROL_CENTER_API.md：中控接口字段、示例报文与客户端处理
+  - docs/SIGNAGE_PROTOCOL.md：药品柜 TCP 报文的字节布局与示例
+  - docs/DATABASE.md：配置库与历史库的表、视图、触发器及字段说明
   - docs/OPERATIONS.md：部署、操作、异常处理、现场验收
   - docs/README.md 第 6 节：代码变动与文档同步对照表
   - CHANGELOG.md：历史需求与修改记录
